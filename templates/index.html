@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -11,6 +10,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta
+        name="description"
+        content="Felix AI - Intelligent legal and general purpose AI assistant."
+    >
+
     <title>Felix AI</title>
 
     <link
@@ -20,101 +24,8 @@
 
 </head>
 
+
 <body>
-
-<div class="app">
-
-    <!-- SIDEBAR -->
-
-    <aside
-        class="sidebar"
-        id="sidebar"
-        aria-hidden="false"
-    >
-
-        <div class="sidebar-header">
-
-            <div class="logo">
-
-                <div class="logo-icon">
-                    F
-                </div>
-
-                <span>
-                    Felix AI
-                </span>
-
-            </div>
-
-            <button
-                class="icon-button"
-                id="closeSidebarButton"
-                aria-label="Close sidebar"
-                aria-controls="sidebar"
-                aria-expanded="true"
-                type="button"
-            >
-                ×
-            </button>
-
-        </div>
-
-
-        <button
-            class="new-chat-button"
-            id="newChatButton"
-            type="button"
-        >
-
-            <span>
-                +
-            </span>
-
-            New Chat
-
-        </button>
-
-
-        <div class="conversation-search">
-
-            <input
-                type="text"
-                id="searchInput"
-                placeholder="Search conversations..."
-                aria-label="Search conversations"
-            >
-
-        </div>
-
-
-        <div
-            class="conversation-list"
-            id="conversationList"
-        >
-        </div>
-
-
-        <div class="sidebar-bottom">
-
-            <button
-                class="sidebar-button"
-                id="themeButton"
-                type="button"
-            >
-                Theme
-            </button>
-
-            <button
-                class="sidebar-button"
-                id="settingsButton"
-                type="button"
-            >
-                Settings
-            </button>
-
-        </div>
-
-    </aside>
 
 
     <!-- SIDEBAR BACKDROP -->
@@ -122,54 +33,197 @@
     <div
         class="sidebar-backdrop"
         id="sidebarBackdrop"
-        aria-hidden="true"
+    ></div>
+
+
+
+    <!-- SIDEBAR -->
+
+    <aside
+        class="sidebar"
+        id="sidebar"
     >
-    </div>
 
 
-    <!-- MAIN -->
+        <!-- SIDEBAR HEADER -->
 
-    <main class="main">
+        <div class="sidebar-header">
+
+            <div class="sidebar-logo">
+                Felix AI
+            </div>
+
+
+            <button
+                type="button"
+                class="close-sidebar-button"
+                id="closeSidebarButton"
+                aria-label="Close sidebar"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+
+        <!-- NEW CHAT -->
+
+        <button
+            type="button"
+            id="newChatButton"
+            class="new-chat-button"
+            aria-label="Create a new chat"
+        >
+
+            <span class="new-chat-icon">
+                +
+            </span>
+
+            <span>
+                New Chat
+            </span>
+
+        </button>
+
+
+
+        <!-- SEARCH -->
+
+        <div class="search-container">
+
+            <input
+                type="text"
+                id="searchInput"
+                class="search-input"
+                placeholder="Search conversations..."
+                autocomplete="off"
+            >
+
+        </div>
+
+
+
+        <!-- CONVERSATION HISTORY -->
+
+        <div class="conversation-section">
+
+            <div class="section-title">
+                Conversations
+            </div>
+
+
+            <div
+                id="conversationList"
+                class="conversation-list"
+            >
+
+                <!-- Conversations inserted by JavaScript -->
+
+            </div>
+
+
+            <div
+                id="emptyConversationState"
+                class="empty-conversation-state"
+            >
+
+                No conversations yet.
+
+            </div>
+
+        </div>
+
+
+
+        <!-- SIDEBAR FOOTER -->
+
+        <div class="sidebar-footer">
+
+
+            <button
+                type="button"
+                class="sidebar-footer-button"
+                id="themeButton"
+            >
+
+                <span>
+                    ◐
+                </span>
+
+                <span>
+                    Theme
+                </span>
+
+            </button>
+
+
+
+            <button
+                type="button"
+                class="sidebar-footer-button"
+                id="settingsButton"
+            >
+
+                <span>
+                    ⚙
+                </span>
+
+                <span>
+                    Settings
+                </span>
+
+            </button>
+
+
+        </div>
+
+
+    </aside>
+
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
 
         <!-- HEADER -->
 
-        <header class="header">
+        <header class="main-header">
+
 
             <div class="header-left">
 
-                <!-- HAMBURGER BUTTON -->
 
                 <button
-                    class="icon-button mobile-menu-button"
-                    id="openSidebarButton"
                     type="button"
+                    class="open-sidebar-button"
+                    id="openSidebarButton"
                     aria-label="Open sidebar"
-                    aria-controls="sidebar"
-                    aria-expanded="false"
                 >
                     ☰
                 </button>
 
 
-                <button
-                    class="header-title-button"
-                    id="headerNewChatButton"
-                    type="button"
-                >
+                <div class="header-title-button">
                     Felix AI
-                </button>
+                </div>
+
 
             </div>
 
 
+
             <!-- MODEL SELECTOR -->
 
-            <div class="model-selector">
+            <div class="model-selector-container">
+
 
                 <button
+                    type="button"
                     class="model-selector-button"
                     id="modelSelectorButton"
-                    type="button"
                     aria-haspopup="true"
                     aria-expanded="false"
                 >
@@ -178,11 +232,12 @@
                         Felix AI
                     </span>
 
-                    <span class="dropdown-arrow">
+                    <span class="model-arrow">
                         ▾
                     </span>
 
                 </button>
+
 
 
                 <div
@@ -190,69 +245,48 @@
                     id="modelDropdown"
                 >
 
+
                     <button
+                        type="button"
                         class="model-option active"
-                        data-model="Felix AI"
-                        type="button"
+                        data-model="felix-ai"
                     >
-
-                        <strong>
-                            Felix AI
-                        </strong>
-
-                        <span>
-                            Balanced
-                        </span>
-
+                        Felix AI
                     </button>
 
 
                     <button
-                        class="model-option"
-                        data-model="Fast"
                         type="button"
+                        class="model-option"
+                        data-model="gpt"
                     >
-
-                        <strong>
-                            Fast
-                        </strong>
-
-                        <span>
-                            Faster responses
-                        </span>
-
+                        GPT
                     </button>
 
 
                     <button
-                        class="model-option"
-                        data-model="Reasoning"
                         type="button"
+                        class="model-option"
+                        data-model="gemini"
                     >
-
-                        <strong>
-                            Reasoning
-                        </strong>
-
-                        <span>
-                            Deeper reasoning
-                        </span>
-
+                        Gemini
                     </button>
+
 
                 </div>
 
+
             </div>
+
 
         </header>
 
 
+
         <!-- CHAT AREA -->
 
-        <section
-            class="chat-area"
-            id="chatArea"
-        >
+        <section class="chat-area">
+
 
             <!-- WELCOME SCREEN -->
 
@@ -261,520 +295,480 @@
                 id="welcomeScreen"
             >
 
-                <div class="welcome-logo">
-                    F
+
+                <div class="welcome-content">
+
+
+                    <div class="welcome-icon">
+                        ✦
+                    </div>
+
+
+                    <h1>
+                        How can I help you today?
+                    </h1>
+
+
+                    <p>
+                        Ask Felix AI anything or choose one
+                        of the suggestions below.
+                    </p>
+
+
+
+                    <!-- SUGGESTIONS -->
+
+                    <div
+                        class="suggestion-grid"
+                        id="suggestionGrid"
+                    >
+
+
+                        <button
+                            type="button"
+                            class="suggestion-card"
+                            data-suggestion="Explain Nigerian contract law in simple terms."
+                        >
+
+                            <span class="suggestion-icon">
+                                ⚖
+                            </span>
+
+                            <span>
+                                Explain Nigerian contract law
+                            </span>
+
+                        </button>
+
+
+
+                        <button
+                            type="button"
+                            class="suggestion-card"
+                            data-suggestion="Help me draft a professional legal letter."
+                        >
+
+                            <span class="suggestion-icon">
+                                ✎
+                            </span>
+
+                            <span>
+                                Draft a legal letter
+                            </span>
+
+                        </button>
+
+
+
+                        <button
+                            type="button"
+                            class="suggestion-card"
+                            data-suggestion="Explain artificial intelligence to me like I am a beginner."
+                        >
+
+                            <span class="suggestion-icon">
+                                ✦
+                            </span>
+
+                            <span>
+                                Explain AI for beginners
+                            </span>
+
+                        </button>
+
+
+
+                        <button
+                            type="button"
+                            class="suggestion-card"
+                            data-suggestion="Help me create a product management strategy."
+                        >
+
+                            <span class="suggestion-icon">
+                                ◈
+                            </span>
+
+                            <span>
+                                Create a product strategy
+                            </span>
+
+                        </button>
+
+
+                    </div>
+
+
                 </div>
 
-                <h1>
-                    How can I help you today?
-                </h1>
-
-                <p>
-                    Ask Felix AI anything.
-                </p>
-
-
-                <!-- SUGGESTIONS -->
-
-                <div class="suggestion-grid">
-
-                    <button
-                        class="suggestion-card"
-                        data-prompt="Explain artificial intelligence to me like I am a beginner."
-                        type="button"
-                    >
-
-                        <strong>
-                            Learn something
-                        </strong>
-
-                        <span>
-                            Explain a difficult topic simply
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="suggestion-card"
-                        data-prompt="Help me write a professional email."
-                        type="button"
-                    >
-
-                        <strong>
-                            Write something
-                        </strong>
-
-                        <span>
-                            Create professional content
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="suggestion-card"
-                        data-prompt="Help me debug this Python code."
-                        type="button"
-                    >
-
-                        <strong>
-                            Write code
-                        </strong>
-
-                        <span>
-                            Build or debug software
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="suggestion-card"
-                        data-prompt="Give me a detailed plan for learning AI engineering."
-                        type="button"
-                    >
-
-                        <strong>
-                            Make a plan
-                        </strong>
-
-                        <span>
-                            Organise your next steps
-                        </span>
-
-                    </button>
-
-                </div>
 
             </div>
+
 
 
             <!-- MESSAGES -->
 
             <div
-                class="message-container"
-                id="messageContainer"
-            >
-            </div>
+                class="messages-container"
+                id="messagesContainer"
+            ></div>
+
 
 
             <!-- TYPING INDICATOR -->
 
             <div
                 class="typing-container"
-                id="typingContainer"
+                id="typingIndicator"
+                style="display: none;"
             >
 
-                <div class="typing-indicator">
+                <div class="typing-avatar">
+                    F
+                </div>
+
+
+                <div class="typing-dots">
 
                     <span></span>
-
                     <span></span>
-
                     <span></span>
 
                 </div>
 
-                <span>
-                    Felix AI is thinking...
-                </span>
-
             </div>
+
 
         </section>
 
 
-        <!-- INPUT AREA -->
 
-        <section class="input-area">
+        <!-- MESSAGE INPUT -->
 
-            <!-- ATTACHMENT PREVIEW -->
-
-            <div
-                class="attachment-preview"
-                id="attachmentPreview"
-            >
-            </div>
+        <form
+            class="input-area"
+            id="messageForm"
+        >
 
 
             <div class="input-wrapper">
 
-                <!-- ATTACHMENT BUTTON -->
 
-                <button
-                    class="attachment-button"
-                    id="attachmentButton"
-                    title="Attach file"
-                    aria-label="Attach file"
-                    type="button"
-                >
-                    +
-                </button>
+                <!-- ATTACHMENT PREVIEW -->
+
+                <div
+                    class="attachment-preview"
+                    id="attachmentPreview"
+                ></div>
 
 
-                <!-- FILE INPUT -->
 
-                <input
-                    type="file"
-                    id="fileInput"
-                    hidden
-                    accept=".txt,.md,.csv,.json,.pdf,.docx,.jpg,.jpeg,.png,.gif,.webp"
-                >
+                <div class="input-row">
 
 
-                <!-- MESSAGE INPUT -->
-
-                <textarea
-                    id="messageInput"
-                    rows="1"
-                    placeholder="Message Felix AI..."
-                    aria-label="Message Felix AI"
-                ></textarea>
-
-
-                <!-- STOP BUTTON -->
-
-                <button
-                    class="stop-button"
-                    id="stopButton"
-                    hidden
-                    type="button"
-                >
-                    Stop
-                </button>
+                    <button
+                        type="button"
+                        class="attachment-button"
+                        id="attachmentButton"
+                        aria-label="Attach file"
+                    >
+                        +
+                    </button>
 
 
-                <!-- SEND BUTTON -->
-
-                <button
-                    class="send-button"
-                    id="sendButton"
-                    title="Send message"
-                    aria-label="Send message"
-                    type="button"
-                >
-                    ↑
-                </button>
-
-            </div>
+                    <input
+                        type="file"
+                        id="fileInput"
+                        hidden
+                        multiple
+                    >
 
 
-            <!-- DISCLAIMER -->
-
-            <div class="input-disclaimer">
-
-                Felix AI can make mistakes. Check important information.
-
-            </div>
-
-        </section>
+                    <textarea
+                        id="messageInput"
+                        class="message-input"
+                        placeholder="Message Felix AI..."
+                        rows="1"
+                    ></textarea>
 
 
-        <!-- NOTIFICATION -->
-
-        <div
-            class="notification"
-            id="notification"
-            role="status"
-            aria-live="polite"
-        >
-        </div>
-
-    </main>
-
-</div>
+                    <button
+                        type="button"
+                        class="stop-button"
+                        id="stopButton"
+                        style="display: none;"
+                        aria-label="Stop generating"
+                    >
+                        ■
+                    </button>
 
 
-<!-- ========================================================= -->
-<!-- SETTINGS OVERLAY -->
-<!-- ========================================================= -->
-
-<div
-    class="settings-overlay"
-    id="settingsOverlay"
->
-
-    <section
-        class="settings-panel"
-        id="settingsPanel"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="settingsTitle"
-    >
-
-        <!-- SETTINGS HEADER -->
-
-        <div class="settings-header">
-
-            <h2 id="settingsTitle">
-                Settings
-            </h2>
-
-            <button
-                class="settings-close-button"
-                id="settingsCloseButton"
-                type="button"
-                aria-label="Close settings"
-            >
-                ×
-            </button>
-
-        </div>
+                    <button
+                        type="submit"
+                        class="send-button"
+                        id="sendButton"
+                        aria-label="Send message"
+                    >
+                        ↑
+                    </button>
 
 
-        <!-- SETTINGS BODY -->
-
-        <div class="settings-body">
-
-
-            <!-- APPEARANCE -->
-
-            <div class="settings-section">
-
-                <div class="settings-section-title">
-                    Appearance
                 </div>
 
 
-                <div class="settings-row">
+            </div>
 
-                    <div class="settings-row-content">
 
-                        <span class="settings-row-title">
-                            Theme
-                        </span>
 
-                        <span class="settings-row-description">
-                            Choose how Felix AI looks.
-                        </span>
+            <div class="input-disclaimer">
+
+                Felix AI can make mistakes.
+                Verify important information.
+
+            </div>
+
+
+        </form>
+
+
+    </main>
+
+
+
+    <!-- SETTINGS -->
+
+    <div
+        class="settings-overlay"
+        id="settingsOverlay"
+    >
+
+
+        <div
+            class="settings-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settingsTitle"
+        >
+
+
+            <div class="settings-header">
+
+
+                <h2 id="settingsTitle">
+                    Settings
+                </h2>
+
+
+                <button
+                    type="button"
+                    id="settingsCloseButton"
+                    class="settings-close-button"
+                    aria-label="Close settings"
+                >
+                    ×
+                </button>
+
+
+            </div>
+
+
+
+            <div class="settings-content">
+
+
+                <!-- DARK MODE -->
+
+                <div class="setting-row">
+
+
+                    <div>
+
+                        <h3>
+                            Dark Mode
+                        </h3>
+
+                        <p>
+                            Use a darker appearance.
+                        </p>
 
                     </div>
 
 
-                    <select
-                        class="settings-select"
-                        id="settingsTheme"
-                    >
+                    <label class="switch">
 
-                        <option value="light">
-                            Light
-                        </option>
+                        <input
+                            type="checkbox"
+                            id="settingsTheme"
+                        >
 
-                        <option value="dark">
-                            Dark
-                        </option>
+                        <span class="slider"></span>
 
-                    </select>
+                    </label>
+
 
                 </div>
 
-            </div>
-
-
-            <!-- CHAT SETTINGS -->
-
-            <div class="settings-section">
-
-                <div class="settings-section-title">
-                    Chat
-                </div>
 
 
                 <!-- ENTER TO SEND -->
 
-                <div class="settings-row">
+                <div class="setting-row">
 
-                    <div class="settings-row-content">
 
-                        <span class="settings-row-title">
-                            Enter to send
-                        </span>
+                    <div>
 
-                        <span class="settings-row-description">
-                            Press Enter to send a message.
-                        </span>
+                        <h3>
+                            Enter to Send
+                        </h3>
+
+                        <p>
+                            Press Enter to send messages.
+                        </p>
 
                     </div>
 
 
-                    <label class="settings-toggle">
+                    <label class="switch">
 
                         <input
                             type="checkbox"
                             id="settingsEnterToSend"
+                            checked
                         >
 
-                        <span class="settings-toggle-slider"></span>
+                        <span class="slider"></span>
 
                     </label>
 
+
                 </div>
+
 
 
                 <!-- CONVERSATION HISTORY -->
 
-                <div class="settings-row">
+                <div class="setting-row">
 
-                    <div class="settings-row-content">
 
-                        <span class="settings-row-title">
-                            Conversation history
-                        </span>
+                    <div>
 
-                        <span class="settings-row-description">
-                            Keep previous conversations available in the sidebar.
-                        </span>
+                        <h3>
+                            Conversation History
+                        </h3>
+
+                        <p>
+                            Save your conversations.
+                        </p>
 
                     </div>
 
 
-                    <label class="settings-toggle">
+                    <label class="switch">
 
                         <input
                             type="checkbox"
                             id="settingsConversationHistory"
+                            checked
                         >
 
-                        <span class="settings-toggle-slider"></span>
+                        <span class="slider"></span>
 
                     </label>
 
+
                 </div>
+
 
 
                 <!-- FILE ATTACHMENTS -->
 
-                <div class="settings-row">
+                <div class="setting-row">
 
-                    <div class="settings-row-content">
 
-                        <span class="settings-row-title">
-                            File attachments
-                        </span>
+                    <div>
 
-                        <span class="settings-row-description">
-                            Allow files to be attached to messages.
-                        </span>
+                        <h3>
+                            File Attachments
+                        </h3>
+
+                        <p>
+                            Allow files to be attached.
+                        </p>
 
                     </div>
 
 
-                    <label class="settings-toggle">
+                    <label class="switch">
 
                         <input
                             type="checkbox"
                             id="settingsFileAttachments"
+                            checked
                         >
 
-                        <span class="settings-toggle-slider"></span>
+                        <span class="slider"></span>
 
                     </label>
 
-                </div>
 
-            </div>
-
-
-            <!-- MODEL SETTINGS -->
-
-            <div class="settings-section">
-
-                <div class="settings-section-title">
-                    Model
                 </div>
 
 
-                <div class="settings-row">
 
-                    <div class="settings-row-content">
+                <!-- CURRENT MODEL -->
 
-                        <span class="settings-row-title">
-                            Current model
-                        </span>
+                <div class="setting-row">
 
-                        <span
-                            class="settings-row-description"
-                            id="settingsCurrentModel"
-                        >
-                            Felix AI
-                        </span>
+
+                    <div>
+
+                        <h3>
+                            Current Model
+                        </h3>
+
+                        <p>
+                            The model currently being used.
+                        </p>
 
                     </div>
 
+
+                    <span id="settingsCurrentModel">
+                        Felix AI
+                    </span>
+
+
                 </div>
+
 
             </div>
 
 
-            <!-- ABOUT -->
 
-            <div class="settings-section">
-
-                <div class="settings-section-title">
-                    About
-                </div>
+            <div class="settings-footer">
 
 
-                <div class="settings-row">
+                <button
+                    type="button"
+                    id="settingsDoneButton"
+                    class="settings-done-button"
+                >
+                    Done
+                </button>
 
-                    <div class="settings-row-content">
-
-                        <span class="settings-row-title">
-                            Felix AI
-                        </span>
-
-                        <span class="settings-row-description">
-                            Your personal AI assistant.
-                        </span>
-
-                    </div>
-
-                </div>
 
             </div>
+
 
         </div>
 
 
-        <!-- SETTINGS FOOTER -->
-
-        <div class="settings-footer">
-
-            <button
-                class="settings-done-button"
-                id="settingsDoneButton"
-                type="button"
-            >
-                Done
-            </button>
-
-        </div>
-
-    </section>
-
-</div>
+    </div>
 
 
-<!-- ========================================================= -->
-<!-- JAVASCRIPT LIBRARIES -->
-<!-- ========================================================= -->
 
-<script
-    src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
-></script>
-
-
-<script
-    src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"
-></script>
-
-
-<!-- FELIX AI JAVASCRIPT -->
-
-<script
-    src="{{ url_for('static', filename='app.js') }}"
-></script>
+    <script
+        src="{{ url_for('static', filename='app.js') }}"
+    ></script>
 
 
 </body>

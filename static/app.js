@@ -1,8 +1,29 @@
-"use strict";
+/*
+   GLOBAL STATE
+*/
 
-/* =========================================================
-   ELEMENT REFERENCES
-========================================================= */
+let currentConversation = [];
+
+let currentConversationId = null;
+
+let currentConversationTitle = null;
+
+let currentModelName = "felix-ai";
+
+let attachedFiles = [];
+
+let currentAbortController = null;
+
+let conversations = [];
+
+let deletedConversationIds = [];
+
+let renamedConversationTitles = {};
+
+
+/*
+   DOM ELEMENTS
+*/
 
 const sidebar =
     document.getElementById("sidebar");
@@ -13,32 +34,11 @@ const sidebarBackdrop =
 const newChatButton =
     document.getElementById("newChatButton");
 
-const headerNewChatButton =
-    document.getElementById("headerNewChatButton");
-
-const searchInput =
-    document.getElementById("searchInput");
-
-const conversationList =
-    document.getElementById("conversationList");
-
-const themeButton =
-    document.getElementById("themeButton");
-
-const settingsButton =
-    document.getElementById("settingsButton");
-
 const openSidebarButton =
     document.getElementById("openSidebarButton");
 
 const closeSidebarButton =
     document.getElementById("closeSidebarButton");
-
-const messageForm =
-    document.getElementById("messageForm");
-
-const messageInput =
-    document.getElementById("messageInput");
 
 const messagesContainer =
     document.getElementById("messagesContainer");
@@ -46,209 +46,137 @@ const messagesContainer =
 const welcomeScreen =
     document.getElementById("welcomeScreen");
 
-const suggestionGrid =
-    document.getElementById("suggestionGrid");
+const typingIndicator =
+    document.getElementById("typingIndicator");
 
-const stopButton =
-    document.getElementById("stopButton");
+const messageForm =
+    document.getElementById("messageForm");
+
+const messageInput =
+    document.getElementById("messageInput");
 
 const sendButton =
     document.getElementById("sendButton");
 
-const fileInput =
-    document.getElementById("fileInput");
+const stopButton =
+    document.getElementById("stopButton");
 
 const attachmentButton =
     document.getElementById("attachmentButton");
 
-const attachedFiles =
-    document.getElementById("attachedFiles");
+const fileInput =
+    document.getElementById("fileInput");
 
-const typingIndicator =
-    document.getElementById("typingIndicator");
+const attachmentPreview =
+    document.getElementById("attachmentPreview");
 
-const modelButton =
-    document.getElementById("modelButton");
+const suggestionGrid =
+    document.getElementById("suggestionGrid");
 
-const modelMenu =
-    document.getElementById("modelMenu");
+const searchInput =
+    document.getElementById("searchInput");
 
-const currentModel =
-    document.getElementById("currentModel");
+const conversationList =
+    document.getElementById("conversationList");
+
+const emptyConversationState =
+    document.getElementById("emptyConversationState");
+
+const themeButton =
+    document.getElementById("themeButton");
+
+const settingsButton =
+    document.getElementById("settingsButton");
 
 const settingsOverlay =
     document.getElementById("settingsOverlay");
 
-const settingsPanel =
-    document.getElementById("settingsPanel");
+const settingsCloseButton =
+    document.getElementById("settingsCloseButton");
 
-const closeSettingsButton =
-    document.getElementById("closeSettingsButton");
+const settingsDoneButton =
+    document.getElementById("settingsDoneButton");
+
+const settingsTheme =
+    document.getElementById("settingsTheme");
+
+const settingsEnterToSend =
+    document.getElementById("settingsEnterToSend");
+
+const settingsConversationHistory =
+    document.getElementById(
+        "settingsConversationHistory"
+    );
+
+const settingsFileAttachments =
+    document.getElementById(
+        "settingsFileAttachments"
+    );
+
+const settingsCurrentModel =
+    document.getElementById(
+        "settingsCurrentModel"
+    );
+
+const modelSelectorButton =
+    document.getElementById(
+        "modelSelectorButton"
+    );
+
+const modelDropdown =
+    document.getElementById(
+        "modelDropdown"
+    );
+
+const selectedModel =
+    document.getElementById(
+        "selectedModel"
+    );
 
 
-/* =========================================================
-   APPLICATION STATE
-========================================================= */
-
-let currentConversation = [];
-
-let conversations = [];
-
-let currentConversationId = null;
-
-let selectedFiles = [];
-
-let isGenerating = false;
-
-let abortController = null;
-
-let currentModelName =
-    localStorage.getItem("felixAIModel") ||
-    "Felix AI";
-
-
-/* =========================================================
-   INITIALIZE APPLICATION
-========================================================= */
+/*
+   START APPLICATION
+*/
 
 document.addEventListener(
     "DOMContentLoaded",
-    initializeApp
+    function () {
+
+        loadConversationManagementState();
+
+        setupSidebar();
+
+        setupNewChat();
+
+        setupTextarea();
+
+        setupMessageForm();
+
+        setupSuggestionButtons();
+
+        setupAttachments();
+
+        setupModelSelector();
+
+        setupSearch();
+
+        setupTheme();
+
+        setupSettings();
+
+        loadConversations();
+
+        updateSendButton();
+
+    }
 );
 
 
-async function initializeApp() {
+/*
+   SIDEBAR
+*/
 
-    setupEventListeners();
-
-    /*
-        Set the correct initial sidebar state.
-
-        Desktop:
-        Sidebar starts open.
-
-        Mobile:
-        Sidebar starts closed.
-    */
-
-    if (window.innerWidth <= 768) {
-
-        closeSidebar();
-
-    } else {
-
-        openSidebar();
-
-    }
-
-    loadTheme();
-
-    loadSettings();
-
-    await loadConversations();
-
-    messageInput.focus();
-}
-
-
-/* =========================================================
-   EVENT LISTENERS
-========================================================= */
-
-function setupEventListeners() {
-
-    /* -----------------------------------------------------
-       NEW CHAT
-    ----------------------------------------------------- */
-
-    if (newChatButton) {
-
-        newChatButton.addEventListener(
-            "click",
-            function () {
-
-                createNewChat();
-
-            }
-        );
-
-    }
-
-
-    if (headerNewChatButton) {
-
-        headerNewChatButton.addEventListener(
-            "click",
-            function () {
-
-                createNewChat();
-
-            }
-        );
-
-    }
-
-
-    /* -----------------------------------------------------
-       MESSAGE FORM
-    ----------------------------------------------------- */
-
-    if (messageForm) {
-
-        messageForm.addEventListener(
-            "submit",
-            function (event) {
-
-                event.preventDefault();
-
-                sendMessage();
-
-            }
-        );
-
-    }
-
-
-    /* -----------------------------------------------------
-       MESSAGE INPUT
-    ----------------------------------------------------- */
-
-    if (messageInput) {
-
-        messageInput.addEventListener(
-            "input",
-            function () {
-
-                resizeTextarea();
-
-            }
-        );
-
-
-        messageInput.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (
-                    event.key === "Enter" &&
-                    !event.shiftKey
-                ) {
-
-                    event.preventDefault();
-
-                    sendMessage();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* -----------------------------------------------------
-       SIDEBAR OPEN BUTTON
-    ----------------------------------------------------- */
+function setupSidebar() {
 
     if (openSidebarButton) {
 
@@ -268,10 +196,6 @@ function setupEventListeners() {
     }
 
 
-    /* -----------------------------------------------------
-       SIDEBAR CLOSE BUTTON
-    ----------------------------------------------------- */
-
     if (closeSidebarButton) {
 
         closeSidebarButton.addEventListener(
@@ -290,17 +214,11 @@ function setupEventListeners() {
     }
 
 
-    /* -----------------------------------------------------
-       SIDEBAR BACKDROP
-    ----------------------------------------------------- */
-
     if (sidebarBackdrop) {
 
         sidebarBackdrop.addEventListener(
             "click",
-            function (event) {
-
-                event.preventDefault();
+            function () {
 
                 closeSidebar();
 
@@ -309,329 +227,191 @@ function setupEventListeners() {
 
     }
 
+}
 
-    /* -----------------------------------------------------
-       SEARCH
-    ----------------------------------------------------- */
 
-    if (searchInput) {
+function openSidebar() {
 
-        searchInput.addEventListener(
-            "input",
-            function () {
+    if (!sidebar) return;
 
-                filterConversations(
-                    searchInput.value
-                );
+    sidebar.classList.remove("closed");
 
-            }
-        );
+    sidebar.classList.add("open");
+
+    if (sidebarBackdrop) {
+
+        sidebarBackdrop.classList.add("show");
+
+    }
+
+}
+
+
+function closeSidebar() {
+
+    if (!sidebar) return;
+
+    sidebar.classList.remove("open");
+
+    sidebar.classList.add("closed");
+
+    if (sidebarBackdrop) {
+
+        sidebarBackdrop.classList.remove("show");
+
+    }
+
+}
+
+
+/*
+   NEW CHAT
+*/
+
+function setupNewChat() {
+
+    if (!newChatButton) return;
+
+    newChatButton.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            createNewChat();
+
+        }
+    );
+
+}
+
+
+function createNewChat() {
+
+    if (currentAbortController) {
+
+        currentAbortController.abort();
+
+        currentAbortController = null;
 
     }
 
 
-    /* -----------------------------------------------------
-       THEME
-    ----------------------------------------------------- */
+    currentConversation = [];
 
-    if (themeButton) {
+    currentConversationId = null;
 
-        themeButton.addEventListener(
-            "click",
-            function () {
+    currentConversationTitle = null;
 
-                toggleTheme();
 
-            }
-        );
+    if (messagesContainer) {
+
+        messagesContainer.innerHTML = "";
 
     }
 
 
-    /* -----------------------------------------------------
-       SETTINGS
-    ----------------------------------------------------- */
+    if (welcomeScreen) {
 
-    if (settingsButton) {
-
-        settingsButton.addEventListener(
-            "click",
-            function () {
-
-                openSettings();
-
-            }
-        );
+        welcomeScreen.style.display = "flex";
 
     }
 
 
-    if (closeSettingsButton) {
+    hideTyping();
 
-        closeSettingsButton.addEventListener(
-            "click",
-            function () {
 
-                closeSettings();
+    if (messageInput) {
 
-            }
-        );
+        messageInput.value = "";
+
+        resizeTextarea();
 
     }
 
 
-    /* -----------------------------------------------------
-       SETTINGS OVERLAY
-    ----------------------------------------------------- */
-
-    if (settingsOverlay) {
-
-        settingsOverlay.addEventListener(
-            "click",
-            function (event) {
-
-                if (
-                    event.target ===
-                    settingsOverlay
-                ) {
-
-                    closeSettings();
-
-                }
-
-            }
-        );
-
-    }
+    attachedFiles = [];
 
 
-    /* -----------------------------------------------------
-       FILE ATTACHMENT
-    ----------------------------------------------------- */
+    if (attachmentPreview) {
 
-    if (attachmentButton && fileInput) {
-
-        attachmentButton.addEventListener(
-            "click",
-            function () {
-
-                fileInput.click();
-
-            }
-        );
+        attachmentPreview.innerHTML = "";
 
     }
 
 
     if (fileInput) {
 
-        fileInput.addEventListener(
-            "change",
-            function () {
-
-                handleFileSelection(
-                    fileInput.files
-                );
-
-            }
-        );
+        fileInput.value = "";
 
     }
 
 
-    /* -----------------------------------------------------
-       STOP GENERATION
-    ----------------------------------------------------- */
+    if (sendButton) {
+
+        sendButton.style.display = "flex";
+
+    }
+
 
     if (stopButton) {
 
-        stopButton.addEventListener(
-            "click",
-            function () {
-
-                stopGeneration();
-
-            }
-        );
+        stopButton.style.display = "none";
 
     }
 
 
-    /* -----------------------------------------------------
-       MODEL SELECTOR
-    ----------------------------------------------------- */
+    updateSendButton();
 
-    if (modelButton) {
+    renderConversationList(conversations);
 
-        modelButton.addEventListener(
-            "click",
-            function (event) {
 
-                event.stopPropagation();
+    if (window.innerWidth <= 767) {
 
-                toggleModelMenu();
-
-            }
-        );
+        closeSidebar();
 
     }
 
-
-    if (modelMenu) {
-
-        const modelOptions =
-            modelMenu.querySelectorAll(
-                "[data-model]"
-            );
-
-        modelOptions.forEach(
-            function (option) {
-
-                option.addEventListener(
-                    "click",
-                    function () {
-
-                        const model =
-                            option.getAttribute(
-                                "data-model"
-                            );
-
-                        if (model) {
-
-                            selectModel(model);
-
-                        }
-
-                    }
-                );
-
-            }
-        );
-
-    }
+}
 
 
-    /* -----------------------------------------------------
-       CLOSE MODEL MENU WHEN CLICKING OUTSIDE
-    ----------------------------------------------------- */
+/*
+   TEXTAREA
+*/
 
-    document.addEventListener(
-        "click",
-        function (event) {
+function setupTextarea() {
 
-            if (
-                modelMenu &&
-                modelButton &&
-                !modelMenu.contains(event.target) &&
-                !modelButton.contains(event.target)
-            ) {
+    if (!messageInput) return;
 
-                closeModelMenu();
 
-            }
+    messageInput.addEventListener(
+        "input",
+        function () {
+
+            resizeTextarea();
+
+            updateSendButton();
 
         }
     );
 
 
-    /* -----------------------------------------------------
-       ESCAPE KEY
-    ----------------------------------------------------- */
-
-    document.addEventListener(
+    messageInput.addEventListener(
         "keydown",
         function (event) {
 
-            if (event.key !== "Escape") {
-
-                return;
-
-            }
-
-
             if (
-                modelMenu &&
-                modelMenu.classList.contains("show")
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                settingsEnterToSend &&
+                settingsEnterToSend.checked
             ) {
 
-                closeModelMenu();
+                event.preventDefault();
 
-                return;
-
-            }
-
-
-            if (
-                settingsOverlay &&
-                settingsOverlay.classList.contains("show")
-            ) {
-
-                closeSettings();
-
-                return;
-
-            }
-
-
-            if (
-                sidebar &&
-                !sidebar.classList.contains("closed")
-            ) {
-
-                closeSidebar();
-
-            }
-
-        }
-    );
-
-
-    /* -----------------------------------------------------
-       WINDOW RESIZE
-    ----------------------------------------------------- */
-
-    window.addEventListener(
-        "resize",
-        function () {
-
-            /*
-                Keep desktop and mobile states
-                consistent when screen size changes.
-            */
-
-            if (window.innerWidth > 768) {
-
-                if (
-                    sidebar &&
-                    sidebar.classList.contains("closed")
-                ) {
-
-                    /*
-                        Keep the user's closed state.
-                    */
-
-                    return;
-
-                }
-
-                openSidebar();
-
-            } else {
-
-                /*
-                    On mobile, close the sidebar
-                    automatically if it was not explicitly
-                    opened.
-                */
-
-                if (
-                    sidebar &&
-                    !sidebar.classList.contains("open")
-                ) {
-
-                    closeSidebar();
-
-                }
+                sendMessage();
 
             }
 
@@ -641,258 +421,132 @@ function setupEventListeners() {
 }
 
 
-/* =========================================================
-   SIDEBAR FUNCTIONS
-========================================================= */
+function resizeTextarea() {
+
+    if (!messageInput) return;
+
+    messageInput.style.height = "auto";
+
+    messageInput.style.height =
+        Math.min(
+            messageInput.scrollHeight,
+            180
+        ) + "px";
+
+}
 
 
 /*
-    OPEN SIDEBAR
-
-    This function:
-    1. Removes "closed"
-    2. Adds "open"
-    3. Updates body state
-    4. Shows the sidebar
-    5. Updates accessibility attributes
+   MESSAGE FORM
 */
 
-function openSidebar() {
+function setupMessageForm() {
 
-    if (!sidebar) {
+    if (!messageForm) return;
 
-        return;
+    messageForm.addEventListener(
+        "submit",
+        function (event) {
 
-    }
+            event.preventDefault();
 
+            sendMessage();
 
-    sidebar.classList.remove(
-        "closed"
-    );
-
-    sidebar.classList.add(
-        "open"
-    );
-
-
-    document.body.classList.remove(
-        "sidebar-closed"
-    );
-
-    document.body.classList.add(
-        "sidebar-open"
-    );
-
-
-    if (sidebarBackdrop) {
-
-        sidebarBackdrop.classList.add(
-            "show"
-        );
-
-        sidebarBackdrop.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-
-    }
-
-
-    if (openSidebarButton) {
-
-        openSidebarButton.setAttribute(
-            "aria-expanded",
-            "true"
-        );
-
-    }
-
-
-    if (closeSidebarButton) {
-
-        closeSidebarButton.setAttribute(
-            "aria-expanded",
-            "true"
-        );
-
-    }
-
-
-    sidebar.setAttribute(
-        "aria-hidden",
-        "false"
+        }
     );
 
 }
 
 
 /*
-    CLOSE SIDEBAR
-
-    This is the important fix.
-
-    The previous version only removed "open".
-    This version also adds "closed".
-
-    That allows the CSS to actually hide the sidebar
-    and display the hamburger button.
+   SEND BUTTON
 */
 
-function closeSidebar() {
+function updateSendButton() {
 
-    if (!sidebar) {
+    if (!sendButton || !messageInput) return;
 
-        return;
+    const hasText =
+        messageInput.value.trim().length > 0;
 
-    }
+    sendButton.disabled = !hasText;
 
-
-    sidebar.classList.remove(
-        "open"
-    );
-
-    sidebar.classList.add(
-        "closed"
-    );
-
-
-    document.body.classList.remove(
-        "sidebar-open"
-    );
-
-    document.body.classList.add(
-        "sidebar-closed"
-    );
-
-
-    if (sidebarBackdrop) {
-
-        sidebarBackdrop.classList.remove(
-            "show"
-        );
-
-        sidebarBackdrop.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-
-    }
-
-
-    if (openSidebarButton) {
-
-        openSidebarButton.setAttribute(
-            "aria-expanded",
-            "false"
-        );
-
-    }
-
-
-    if (closeSidebarButton) {
-
-        closeSidebarButton.setAttribute(
-            "aria-expanded",
-            "false"
-        );
-
-    }
-
-
-    sidebar.setAttribute(
-        "aria-hidden",
-        "true"
-    );
+    sendButton.style.opacity =
+        hasText ? "1" : "0.5";
 
 }
 
 
-/* =========================================================
-   NEW CHAT
-========================================================= */
-
-function createNewChat() {
-
-    currentConversation = [];
-
-    currentConversationId = null;
-
-    messagesContainer.innerHTML = "";
-
-    if (welcomeScreen) {
-
-        welcomeScreen.style.display =
-            "flex";
-
-    }
-
-    hideTyping();
-
-    messageInput.value = "";
-
-    resizeTextarea();
-
-    closeSidebar();
-
-    messageInput.focus();
-
-}
-
-
-/* =========================================================
+/*
    SEND MESSAGE
-========================================================= */
+*/
 
 async function sendMessage() {
 
-    if (!messageInput) {
-
-        return;
-
-    }
+    if (!messageInput) return;
 
 
     const message =
         messageInput.value.trim();
 
 
-    if (
-        !message ||
-        isGenerating
-    ) {
+    if (!message) return;
 
-        return;
+
+    if (currentConversation.length === 0) {
+
+        currentConversationTitle =
+            createConversationTitle(message);
+
+    }
+
+
+    if (welcomeScreen) {
+
+        welcomeScreen.style.display = "none";
 
     }
 
 
     addUserMessage(message);
 
+
+    currentConversation.push({
+        role: "user",
+        content: message
+    });
+
+
     messageInput.value = "";
 
     resizeTextarea();
 
-    hideWelcomeScreen();
+    updateSendButton();
+
+
+    await saveCurrentConversation();
+
+
+    renderConversationList(conversations);
+
 
     showTyping();
 
-    isGenerating = true;
 
-    abortController =
+    currentAbortController =
         new AbortController();
-
-
-    if (sendButton) {
-
-        sendButton.disabled = true;
-
-    }
 
 
     if (stopButton) {
 
-        stopButton.style.display =
-            "flex";
+        stopButton.style.display = "flex";
+
+    }
+
+
+    if (sendButton) {
+
+        sendButton.style.display = "none";
 
     }
 
@@ -923,7 +577,8 @@ async function sendMessage() {
                     }),
 
                     signal:
-                        abortController.signal
+                        currentAbortController.signal
+
                 }
             );
 
@@ -931,7 +586,7 @@ async function sendMessage() {
         if (!response.ok) {
 
             throw new Error(
-                "Failed to get response from server."
+                "Unable to contact the AI server."
             );
 
         }
@@ -944,34 +599,31 @@ async function sendMessage() {
         hideTyping();
 
 
-        const reply =
+        const assistantMessage =
             data.response ||
             data.message ||
-            "I could not generate a response.";
+            data.reply ||
+            "I was unable to generate a response.";
 
 
-        addAssistantMessage(reply);
-
-
-        currentConversation.push({
-
-            role: "user",
-
-            content: message
-
-        });
+        addAssistantMessage(
+            assistantMessage
+        );
 
 
         currentConversation.push({
 
             role: "assistant",
 
-            content: reply
+            content: assistantMessage
 
         });
 
 
         await saveCurrentConversation();
+
+
+        await loadConversations();
 
 
     } catch (error) {
@@ -980,33 +632,24 @@ async function sendMessage() {
 
 
         if (
-            error.name !==
-            "AbortError"
+            error.name !== "AbortError"
         ) {
-
-            addAssistantMessage(
-                "Sorry, something went wrong while processing your message."
-            );
 
             console.error(
                 "Chat error:",
                 error
             );
 
+
+            addAssistantMessage(
+                "Sorry, something went wrong while processing your request."
+            );
+
         }
 
     } finally {
 
-        isGenerating = false;
-
-        abortController = null;
-
-
-        if (sendButton) {
-
-            sendButton.disabled = false;
-
-        }
+        currentAbortController = null;
 
 
         if (stopButton) {
@@ -1016,22 +659,1846 @@ async function sendMessage() {
 
         }
 
+
+        if (sendButton) {
+
+            sendButton.style.display =
+                "flex";
+
+        }
+
+
+        updateSendButton();
+
     }
 
 }
 
 
-/* =========================================================
-   USER MESSAGE
-========================================================= */
+/*
+   CREATE CONVERSATION TITLE
+*/
 
-function addUserMessage(message) {
+function createConversationTitle(message) {
 
-    if (!messagesContainer) {
+    let title =
+        message.trim();
+
+
+    title =
+        title.replace(
+            /\s+/g,
+            " "
+        );
+
+
+    if (title.length > 50) {
+
+        title =
+            title.substring(
+                0,
+                50
+            ).trim() + "...";
+
+    }
+
+
+    return title;
+
+}
+
+
+/*
+   CONVERSATION MANAGEMENT STATE
+*/
+
+function loadConversationManagementState() {
+
+    try {
+
+        const deleted =
+            localStorage.getItem(
+                "felix_ai_deleted_conversations"
+            );
+
+
+        if (deleted) {
+
+            const parsed =
+                JSON.parse(deleted);
+
+
+            if (Array.isArray(parsed)) {
+
+                deletedConversationIds =
+                    parsed;
+
+            }
+
+        }
+
+
+        const renamed =
+            localStorage.getItem(
+                "felix_ai_renamed_conversations"
+            );
+
+
+        if (renamed) {
+
+            const parsed =
+                JSON.parse(renamed);
+
+
+            if (
+                parsed &&
+                typeof parsed === "object"
+            ) {
+
+                renamedConversationTitles =
+                    parsed;
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Unable to load conversation management state.",
+            error
+        );
+
+    }
+
+}
+
+
+function saveConversationManagementState() {
+
+    try {
+
+        localStorage.setItem(
+            "felix_ai_deleted_conversations",
+            JSON.stringify(
+                deletedConversationIds
+            )
+        );
+
+
+        localStorage.setItem(
+            "felix_ai_renamed_conversations",
+            JSON.stringify(
+                renamedConversationTitles
+            )
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Unable to save conversation management state.",
+            error
+        );
+
+    }
+
+}
+
+
+/*
+   CONVERSATION ID
+*/
+
+function getConversationIdentifier(
+    conversation
+) {
+
+    if (!conversation) return null;
+
+
+    return (
+        conversation.id ??
+        conversation.localId ??
+        null
+    );
+
+}
+
+
+/*
+   CHECK DELETED CONVERSATION
+*/
+
+function isConversationDeleted(
+    conversation
+) {
+
+    const id =
+        getConversationIdentifier(
+            conversation
+        );
+
+
+    if (id === null) return false;
+
+
+    return deletedConversationIds.some(
+        function (deletedId) {
+
+            return String(deletedId) ===
+                String(id);
+
+        }
+    );
+
+}
+
+
+/*
+   GET RENAMED TITLE
+*/
+
+function getStoredConversationTitle(
+    conversation
+) {
+
+    const id =
+        getConversationIdentifier(
+            conversation
+        );
+
+
+    if (id === null) {
+
+        return null;
+
+    }
+
+
+    return (
+        renamedConversationTitles[
+            String(id)
+        ] || null
+    );
+
+}
+
+
+/*
+   APPLY LOCAL CHANGES
+*/
+
+function applyConversationManagement(
+    conversationListData
+) {
+
+    if (!Array.isArray(
+        conversationListData
+    )) {
+
+        return [];
+
+    }
+
+
+    return conversationListData
+        .filter(
+            function (conversation) {
+
+                return !isConversationDeleted(
+                    conversation
+                );
+
+            }
+        )
+        .map(
+            function (conversation) {
+
+                const renamedTitle =
+                    getStoredConversationTitle(
+                        conversation
+                    );
+
+
+                if (renamedTitle) {
+
+                    return {
+                        ...conversation,
+                        title:
+                            renamedTitle
+                    };
+
+                }
+
+
+                return conversation;
+
+            }
+        );
+
+}
+
+
+/*
+   SAVE CURRENT CONVERSATION
+*/
+
+async function saveCurrentConversation() {
+
+    if (
+        !settingsConversationHistory ||
+        !settingsConversationHistory.checked
+    ) {
 
         return;
 
     }
+
+
+    if (
+        !currentConversation ||
+        currentConversation.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    const temporaryConversation = {
+
+        id: currentConversationId,
+
+        title:
+            currentConversationTitle ||
+            createConversationTitle(
+                currentConversation[0].content
+            ),
+
+        conversation:
+            currentConversation,
+
+        updated_at:
+            new Date().toISOString()
+
+    };
+
+
+    if (!currentConversationId) {
+
+        temporaryConversation.localId =
+            "local-" + Date.now();
+
+        temporaryConversation.id =
+            temporaryConversation.localId;
+
+        currentConversationId =
+            temporaryConversation.id;
+
+        conversations.unshift(
+            temporaryConversation
+        );
+
+    } else {
+
+        const existingIndex =
+            conversations.findIndex(
+                function (conversation) {
+
+                    return String(
+                        conversation.id
+                    ) === String(
+                        currentConversationId
+                    );
+
+                }
+            );
+
+
+        if (existingIndex >= 0) {
+
+            conversations[
+                existingIndex
+            ] = {
+
+                ...conversations[
+                    existingIndex
+                ],
+
+                title:
+                    temporaryConversation.title,
+
+                conversation:
+                    currentConversation,
+
+                updated_at:
+                    temporaryConversation.updated_at
+
+            };
+
+        } else {
+
+            conversations.unshift(
+                temporaryConversation
+            );
+
+        }
+
+    }
+
+
+    conversations =
+        applyConversationManagement(
+            conversations
+        );
+
+
+    saveLocalConversations();
+
+    renderConversationList(
+        conversations
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/conversations",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        id:
+                            isLocalConversationId(
+                                currentConversationId
+                            )
+                                ? null
+                                : currentConversationId,
+
+                        title:
+                            currentConversationTitle,
+
+                        conversation:
+                            currentConversation
+
+                    })
+
+                }
+            );
+
+
+        if (!response.ok) {
+
+            console.warn(
+                "Conversation API did not accept the save request."
+            );
+
+            return;
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (data.id) {
+
+            const oldId =
+                currentConversationId;
+
+
+            currentConversationId =
+                data.id;
+
+
+            const index =
+                conversations.findIndex(
+                    function (conversation) {
+
+                        return String(
+                            conversation.id
+                        ) === String(oldId);
+
+                    }
+                );
+
+
+            if (index >= 0) {
+
+                conversations[index].id =
+                    data.id;
+
+            }
+
+
+            saveLocalConversations();
+
+            renderConversationList(
+                conversations
+            );
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Conversation backend save failed. Local history retained.",
+            error
+        );
+
+    }
+
+}
+
+
+/*
+   LOCAL CONVERSATION BACKUP
+*/
+
+function saveLocalConversations() {
+
+    try {
+
+        localStorage.setItem(
+            "felix_ai_conversations",
+            JSON.stringify(
+                conversations
+            )
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Unable to save local conversation history.",
+            error
+        );
+
+    }
+
+}
+
+
+function loadLocalConversations() {
+
+    try {
+
+        const saved =
+            localStorage.getItem(
+                "felix_ai_conversations"
+            );
+
+
+        if (!saved) return [];
+
+
+        const parsed =
+            JSON.parse(saved);
+
+
+        if (Array.isArray(parsed)) {
+
+            return applyConversationManagement(
+                parsed
+            );
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Unable to read local conversation history.",
+            error
+        );
+
+    }
+
+
+    return [];
+
+}
+
+
+/*
+   LOAD CONVERSATIONS
+*/
+
+async function loadConversations() {
+
+    const localHistory =
+        loadLocalConversations();
+
+
+    if (localHistory.length > 0) {
+
+        conversations =
+            localHistory;
+
+        renderConversationList(
+            conversations
+        );
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/conversations"
+            );
+
+
+        if (!response.ok) {
+
+            return;
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        let serverConversations = [];
+
+
+        if (Array.isArray(data)) {
+
+            serverConversations =
+                data;
+
+        } else if (
+            Array.isArray(
+                data.conversations
+            )
+        ) {
+
+            serverConversations =
+                data.conversations;
+
+        } else if (
+            Array.isArray(
+                data.results
+            )
+        ) {
+
+            serverConversations =
+                data.results;
+
+        }
+
+
+        serverConversations =
+            applyConversationManagement(
+                serverConversations
+            );
+
+
+        conversations =
+            mergeConversations(
+                serverConversations,
+                localHistory
+            );
+
+
+        conversations =
+            applyConversationManagement(
+                conversations
+            );
+
+
+        saveLocalConversations();
+
+        renderConversationList(
+            conversations
+        );
+
+
+    } catch (error) {
+
+        console.warn(
+            "Unable to load server conversation history. Using local history.",
+            error
+        );
+
+
+        renderConversationList(
+            conversations
+        );
+
+    }
+
+}
+
+
+/*
+   MERGE CONVERSATIONS
+*/
+
+function mergeConversations(
+    serverList,
+    localList
+) {
+
+    const merged = [];
+
+
+    serverList.forEach(
+        function (serverConversation) {
+
+            if (!serverConversation) return;
+
+            merged.push(
+                serverConversation
+            );
+
+        }
+    );
+
+
+    localList.forEach(
+        function (localConversation) {
+
+            if (!localConversation) return;
+
+
+            const localId =
+                getConversationIdentifier(
+                    localConversation
+                );
+
+
+            const alreadyExists =
+                merged.some(
+                    function (
+                        serverConversation
+                    ) {
+
+                        const serverId =
+                            getConversationIdentifier(
+                                serverConversation
+                            );
+
+
+                        return (
+                            serverId !== null &&
+                            localId !== null &&
+                            String(serverId) ===
+                                String(localId)
+                        );
+
+                    }
+                );
+
+
+            if (!alreadyExists) {
+
+                merged.push(
+                    localConversation
+                );
+
+            }
+
+        }
+    );
+
+
+    merged.sort(
+        function (a, b) {
+
+            const dateA =
+                new Date(
+                    a.updated_at ||
+                    a.updatedAt ||
+                    0
+                );
+
+
+            const dateB =
+                new Date(
+                    b.updated_at ||
+                    b.updatedAt ||
+                    0
+                );
+
+
+            return dateB - dateA;
+
+        }
+    );
+
+
+    return merged;
+
+}
+
+
+/*
+   RENDER CONVERSATION LIST
+*/
+
+function renderConversationList(
+    conversationData
+) {
+
+    if (!conversationList) return;
+
+
+    conversationList.innerHTML = "";
+
+
+    const validConversations =
+        applyConversationManagement(
+            Array.isArray(
+                conversationData
+            )
+                ? conversationData
+                : []
+        ).filter(
+            function (conversation) {
+
+                return (
+                    conversation &&
+                    (
+                        conversation.conversation ||
+                        conversation.messages
+                    )
+                );
+
+            }
+        );
+
+
+    if (
+        validConversations.length === 0
+    ) {
+
+        if (emptyConversationState) {
+
+            emptyConversationState.style.display =
+                "block";
+
+        }
+
+        return;
+
+    }
+
+
+    if (emptyConversationState) {
+
+        emptyConversationState.style.display =
+            "none";
+
+    }
+
+
+    validConversations.forEach(
+        function (conversation) {
+
+            createConversationItem(
+                conversation
+            );
+
+        }
+    );
+
+}
+
+
+/*
+   CREATE CONVERSATION ITEM
+*/
+
+function createConversationItem(
+    conversation
+) {
+
+    const item =
+        document.createElement("div");
+
+
+    item.className =
+        "conversation-item";
+
+
+    const conversationId =
+        getConversationIdentifier(
+            conversation
+        );
+
+
+    if (
+        String(conversationId) ===
+        String(currentConversationId)
+    ) {
+
+        item.classList.add("active");
+
+    }
+
+
+    /* TITLE */
+
+    const titleElement =
+        document.createElement("div");
+
+
+    titleElement.className =
+        "conversation-title";
+
+
+    titleElement.textContent =
+        conversation.title ||
+        getConversationTitle(
+            conversation
+        );
+
+
+    /* ACTIONS */
+
+    const actions =
+        document.createElement("div");
+
+
+    actions.className =
+        "conversation-actions";
+
+
+    /* THREE DOT BUTTON */
+
+    const menuButton =
+        document.createElement("button");
+
+
+    menuButton.type =
+        "button";
+
+
+    menuButton.className =
+        "conversation-menu-button";
+
+
+    menuButton.setAttribute(
+        "aria-label",
+        "Conversation options"
+    );
+
+
+    menuButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
+
+
+    menuButton.textContent =
+        "⋯";
+
+
+    /* MENU */
+
+    const menu =
+        document.createElement("div");
+
+
+    menu.className =
+        "conversation-menu";
+
+
+    /* RENAME */
+
+    const renameButton =
+        document.createElement("button");
+
+
+    renameButton.type =
+        "button";
+
+
+    renameButton.className =
+        "conversation-menu-item";
+
+
+    renameButton.textContent =
+        "Rename";
+
+
+    renameButton.addEventListener(
+        "click",
+        function (event) {
+
+            event.stopPropagation();
+
+            menu.classList.remove(
+                "show"
+            );
+
+            menuButton.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+            startRenameConversation(
+                conversation,
+                item,
+                titleElement
+            );
+
+        }
+    );
+
+
+    /* DELETE */
+
+    const deleteButton =
+        document.createElement("button");
+
+
+    deleteButton.type =
+        "button";
+
+
+    deleteButton.className =
+        "conversation-menu-item delete";
+
+
+    deleteButton.textContent =
+        "Delete";
+
+
+    deleteButton.addEventListener(
+        "click",
+        function (event) {
+
+            event.stopPropagation();
+
+            menu.classList.remove(
+                "show"
+            );
+
+            menuButton.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+            deleteConversation(
+                conversation
+            );
+
+        }
+    );
+
+
+    menu.appendChild(
+        renameButton
+    );
+
+
+    menu.appendChild(
+        deleteButton
+    );
+
+
+    /* MENU BUTTON */
+
+    menuButton.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            closeAllConversationMenus(
+                menu
+            );
+
+
+            const isOpen =
+                menu.classList.toggle(
+                    "show"
+                );
+
+
+            menuButton.setAttribute(
+                "aria-expanded",
+                String(isOpen)
+            );
+
+        }
+    );
+
+
+    /* CONVERSATION CLICK */
+
+    item.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target.closest(
+                    ".conversation-actions"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            loadConversation(
+                conversationId
+            );
+
+        }
+    );
+
+
+    actions.appendChild(
+        menuButton
+    );
+
+
+    actions.appendChild(
+        menu
+    );
+
+
+    item.appendChild(
+        titleElement
+    );
+
+
+    item.appendChild(
+        actions
+    );
+
+
+    conversationList.appendChild(
+        item
+    );
+
+}
+
+
+/*
+   CLOSE CONVERSATION MENUS
+*/
+
+function closeAllConversationMenus(
+    exceptMenu = null
+) {
+
+    const menus =
+        document.querySelectorAll(
+            ".conversation-menu.show"
+        );
+
+
+    menus.forEach(
+        function (menu) {
+
+            if (menu !== exceptMenu) {
+
+                menu.classList.remove(
+                    "show"
+                );
+
+
+                const button =
+                    menu.parentElement
+                        ?.querySelector(
+                            ".conversation-menu-button"
+                        );
+
+
+                if (button) {
+
+                    button.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+/*
+   RENAME CONVERSATION
+*/
+
+function startRenameConversation(
+    conversation,
+    item,
+    titleElement
+) {
+
+    if (
+        item.querySelector(
+            ".conversation-rename-input"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const oldTitle =
+        titleElement.textContent;
+
+
+    const input =
+        document.createElement("input");
+
+
+    input.type =
+        "text";
+
+
+    input.className =
+        "conversation-rename-input";
+
+
+    input.value =
+        oldTitle;
+
+
+    input.maxLength = 100;
+
+
+    titleElement.replaceWith(
+        input
+    );
+
+
+    input.focus();
+
+    input.select();
+
+
+    let finished = false;
+
+
+    function finishRename(
+        saveChanges
+    ) {
+
+        if (finished) return;
+
+        finished = true;
+
+
+        const newTitle =
+            input.value.trim();
+
+
+        const finalTitle =
+            saveChanges && newTitle
+                ? newTitle
+                : oldTitle;
+
+
+        titleElement.textContent =
+            finalTitle;
+
+
+        input.replaceWith(
+            titleElement
+        );
+
+
+        if (
+            saveChanges &&
+            newTitle &&
+            newTitle !== oldTitle
+        ) {
+
+            saveRenamedConversation(
+                conversation,
+                newTitle
+            );
+
+        }
+
+    }
+
+
+    input.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                finishRename(true);
+
+            }
+
+
+            if (event.key === "Escape") {
+
+                event.preventDefault();
+
+                finishRename(false);
+
+            }
+
+        }
+    );
+
+
+    input.addEventListener(
+        "blur",
+        function () {
+
+            finishRename(true);
+
+        }
+    );
+
+}
+
+
+/*
+   SAVE RENAMED CONVERSATION
+*/
+
+async function saveRenamedConversation(
+    conversation,
+    newTitle
+) {
+
+    const conversationId =
+        getConversationIdentifier(
+            conversation
+        );
+
+
+    if (conversationId === null) {
+
+        return;
+
+    }
+
+
+    renamedConversationTitles[
+        String(conversationId)
+    ] = newTitle;
+
+
+    conversation.title =
+        newTitle;
+
+
+    if (
+        String(conversationId) ===
+        String(currentConversationId)
+    ) {
+
+        currentConversationTitle =
+            newTitle;
+
+    }
+
+
+    saveConversationManagementState();
+
+
+    saveLocalConversations();
+
+
+    renderConversationList(
+        conversations
+    );
+
+
+    /*
+       Try the server endpoint if it exists.
+
+       The current backend may not yet have
+       a PATCH route, so failure here is harmless.
+    */
+
+    if (
+        !isLocalConversationId(
+            conversationId
+        )
+    ) {
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/conversations/${conversationId}`,
+                    {
+
+                        method: "PATCH",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            title: newTitle
+                        })
+
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                console.warn(
+                    "Server rename endpoint is not available. Local rename retained."
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Unable to update conversation title on server. Local rename retained.",
+                error
+            );
+
+        }
+
+    }
+
+}
+
+
+/*
+   DELETE CONVERSATION
+*/
+
+async function deleteConversation(
+    conversation
+) {
+
+    const conversationId =
+        getConversationIdentifier(
+            conversation
+        );
+
+
+    if (conversationId === null) {
+
+        return;
+
+    }
+
+
+    const title =
+        conversation.title ||
+        getConversationTitle(
+            conversation
+        );
+
+
+    const confirmed =
+        window.confirm(
+            `Delete "${title}"?\n\nThis conversation will be removed from your Felix AI history.`
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    /* SAVE DELETE STATE */
+
+    deletedConversationIds =
+        deletedConversationIds.filter(
+            function (id) {
+
+                return String(id) !==
+                    String(conversationId);
+
+            }
+        );
+
+
+    deletedConversationIds.push(
+        conversationId
+    );
+
+
+    delete renamedConversationTitles[
+        String(conversationId)
+    ];
+
+
+    saveConversationManagementState();
+
+
+    /* REMOVE FROM CURRENT ARRAY */
+
+    conversations =
+        conversations.filter(
+            function (item) {
+
+                const itemId =
+                    getConversationIdentifier(
+                        item
+                    );
+
+
+                return (
+                    String(itemId) !==
+                    String(conversationId)
+                );
+
+            }
+        );
+
+
+    saveLocalConversations();
+
+
+    /*
+       If the user deleted the conversation
+       currently being viewed, start a new chat.
+    */
+
+    if (
+        String(currentConversationId) ===
+        String(conversationId)
+    ) {
+
+        createNewChat();
+
+    }
+
+
+    renderConversationList(
+        conversations
+    );
+
+
+    /*
+       Try deleting it from the server too.
+       If the backend does not support DELETE,
+       the local deletion remains active.
+    */
+
+    if (
+        !isLocalConversationId(
+            conversationId
+        )
+    ) {
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/conversations/${conversationId}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                console.warn(
+                    "Server delete endpoint is not available. Local deletion retained."
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Unable to delete conversation from server. Local deletion retained.",
+                error
+            );
+
+        }
+
+    }
+
+}
+
+
+/*
+   GET CONVERSATION TITLE
+*/
+
+function getConversationTitle(
+    conversation
+) {
+
+    const messages =
+        conversation.conversation ||
+        conversation.messages ||
+        [];
+
+
+    if (
+        !Array.isArray(messages) ||
+        messages.length === 0
+    ) {
+
+        return "New Conversation";
+
+    }
+
+
+    const firstUserMessage =
+        messages.find(
+            function (message) {
+
+                return (
+                    message.role === "user"
+                );
+
+            }
+        );
+
+
+    if (
+        firstUserMessage &&
+        firstUserMessage.content
+    ) {
+
+        return createConversationTitle(
+            firstUserMessage.content
+        );
+
+    }
+
+
+    return "New Conversation";
+
+}
+
+
+/*
+   CHECK LOCAL ID
+*/
+
+function isLocalConversationId(id) {
+
+    return (
+        typeof id === "string" &&
+        id.startsWith("local-")
+    );
+
+}
+
+
+/*
+   LOAD ONE CONVERSATION
+*/
+
+async function loadConversation(id) {
+
+    const localConversation =
+        conversations.find(
+            function (conversation) {
+
+                return String(
+                    getConversationIdentifier(
+                        conversation
+                    )
+                ) === String(id);
+
+            }
+        );
+
+
+    if (
+        localConversation &&
+        isLocalConversationId(id)
+    ) {
+
+        displayConversation(
+            localConversation
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/conversations/${id}`
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load conversation."
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        displayConversation(
+            data
+        );
+
+
+    } catch (error) {
+
+        if (localConversation) {
+
+            displayConversation(
+                localConversation
+            );
+
+        } else {
+
+            console.error(
+                "Unable to load conversation:",
+                error
+            );
+
+        }
+
+    }
+
+}
+
+
+/*
+   DISPLAY CONVERSATION
+*/
+
+function displayConversation(
+    conversationData
+) {
+
+    const messages =
+        conversationData.conversation ||
+        conversationData.messages ||
+        [];
+
+
+    if (!Array.isArray(messages)) {
+
+        return;
+
+    }
+
+
+    currentConversationId =
+        conversationData.id ||
+        conversationData.localId;
+
+
+    currentConversationTitle =
+        getStoredConversationTitle(
+            conversationData
+        ) ||
+        conversationData.title ||
+        getConversationTitle(
+            conversationData
+        );
+
+
+    currentConversation =
+        JSON.parse(
+            JSON.stringify(messages)
+        );
+
+
+    if (messagesContainer) {
+
+        messagesContainer.innerHTML = "";
+
+    }
+
+
+    if (welcomeScreen) {
+
+        welcomeScreen.style.display =
+            "none";
+
+    }
+
+
+    currentConversation.forEach(
+        function (message) {
+
+            if (
+                message.role === "user"
+            ) {
+
+                addUserMessage(
+                    message.content
+                );
+
+            } else if (
+                message.role === "assistant"
+            ) {
+
+                addAssistantMessage(
+                    message.content
+                );
+
+            }
+
+        }
+    );
+
+
+    renderConversationList(
+        conversations
+    );
+
+
+    if (
+        window.innerWidth <= 767
+    ) {
+
+        closeSidebar();
+
+    }
+
+
+    scrollToBottom();
+
+}
+
+
+/*
+   USER MESSAGE
+*/
+
+function addUserMessage(message) {
+
+    if (!messagesContainer) return;
 
 
     const messageElement =
@@ -1064,22 +2531,20 @@ function addUserMessage(message) {
     );
 
 
-    scrollMessagesToBottom();
+    scrollToBottom();
 
 }
 
 
-/* =========================================================
+/*
    ASSISTANT MESSAGE
-========================================================= */
+*/
 
-function addAssistantMessage(message) {
+function addAssistantMessage(
+    message
+) {
 
-    if (!messagesContainer) {
-
-        return;
-
-    }
+    if (!messagesContainer) return;
 
 
     const messageElement =
@@ -1088,6 +2553,18 @@ function addAssistantMessage(message) {
 
     messageElement.className =
         "message assistant";
+
+
+    const avatar =
+        document.createElement("div");
+
+
+    avatar.className =
+        "typing-avatar";
+
+
+    avatar.textContent =
+        "F";
 
 
     const content =
@@ -1103,6 +2580,11 @@ function addAssistantMessage(message) {
 
 
     messageElement.appendChild(
+        avatar
+    );
+
+
+    messageElement.appendChild(
         content
     );
 
@@ -1112,23 +2594,18 @@ function addAssistantMessage(message) {
     );
 
 
-    scrollMessagesToBottom();
+    scrollToBottom();
 
 }
 
 
-/* =========================================================
-   SCROLL MESSAGES
-========================================================= */
+/*
+   SCROLL
+*/
 
-function scrollMessagesToBottom() {
+function scrollToBottom() {
 
-    if (!messagesContainer) {
-
-        return;
-
-    }
-
+    if (!messagesContainer) return;
 
     messagesContainer.scrollTop =
         messagesContainer.scrollHeight;
@@ -1136,189 +2613,108 @@ function scrollMessagesToBottom() {
 }
 
 
-/* =========================================================
-   WELCOME SCREEN
-========================================================= */
-
-function hideWelcomeScreen() {
-
-    if (welcomeScreen) {
-
-        welcomeScreen.style.display =
-            "none";
-
-    }
-
-}
-
-
-/* =========================================================
-   TYPING INDICATOR
-========================================================= */
+/*
+   TYPING
+*/
 
 function showTyping() {
 
-    if (typingIndicator) {
+    if (!typingIndicator) return;
 
-        typingIndicator.style.display =
-            "flex";
+    typingIndicator.style.display =
+        "flex";
 
-    }
+    scrollToBottom();
 
 }
 
 
 function hideTyping() {
 
-    if (typingIndicator) {
+    if (!typingIndicator) return;
 
-        typingIndicator.style.display =
-            "none";
-
-    }
+    typingIndicator.style.display =
+        "none";
 
 }
 
 
-/* =========================================================
-   STOP GENERATION
-========================================================= */
+/*
+   STOP
+*/
 
-function stopGeneration() {
+if (stopButton) {
 
-    if (abortController) {
+    stopButton.addEventListener(
+        "click",
+        function () {
 
-        abortController.abort();
+            if (currentAbortController) {
 
-    }
+                currentAbortController.abort();
 
+                currentAbortController = null;
 
-    isGenerating = false;
-
-    hideTyping();
-
-
-    if (sendButton) {
-
-        sendButton.disabled = false;
-
-    }
+            }
 
 
-    if (stopButton) {
-
-        stopButton.style.display =
-            "none";
-
-    }
-
-}
+            hideTyping();
 
 
-/* =========================================================
-   TEXTAREA RESIZE
-========================================================= */
-
-function resizeTextarea() {
-
-    if (!messageInput) {
-
-        return;
-
-    }
+            stopButton.style.display =
+                "none";
 
 
-    messageInput.style.height =
-        "auto";
+            if (sendButton) {
 
+                sendButton.style.display =
+                    "flex";
 
-    messageInput.style.height =
-        messageInput.scrollHeight +
-        "px";
+            }
+
+        }
+    );
 
 }
 
 
-/* =========================================================
-   FILE HANDLING
-========================================================= */
+/*
+   SUGGESTIONS
+*/
 
-function handleFileSelection(files) {
+function setupSuggestionButtons() {
 
-    if (!files) {
-
-        return;
-
-    }
+    if (!suggestionGrid) return;
 
 
-    selectedFiles =
-        Array.from(files);
+    const buttons =
+        suggestionGrid.querySelectorAll(
+            ".suggestion-card"
+        );
 
 
-    displayAttachedFiles();
+    buttons.forEach(
+        function (button) {
 
-}
-
-
-function displayAttachedFiles() {
-
-    if (!attachedFiles) {
-
-        return;
-
-    }
-
-
-    attachedFiles.innerHTML = "";
-
-
-    selectedFiles.forEach(
-        function (file, index) {
-
-            const fileElement =
-                document.createElement("div");
-
-
-            fileElement.className =
-                "attached-file";
-
-
-            fileElement.innerHTML = `
-                <span>${escapeHtml(file.name)}</span>
-                <button
-                    type="button"
-                    data-index="${index}"
-                    aria-label="Remove file"
-                >
-                    ×
-                </button>
-            `;
-
-
-            const removeButton =
-                fileElement.querySelector(
-                    "button"
-                );
-
-
-            removeButton.addEventListener(
+            button.addEventListener(
                 "click",
                 function () {
 
-                    selectedFiles.splice(
-                        index,
-                        1
-                    );
+                    if (!messageInput) return;
 
-                    displayAttachedFiles();
+
+                    messageInput.value =
+                        button.dataset.suggestion ||
+                        "";
+
+
+                    resizeTextarea();
+
+                    updateSendButton();
+
+                    messageInput.focus();
 
                 }
-            );
-
-
-            attachedFiles.appendChild(
-                fileElement
             );
 
         }
@@ -1327,128 +2723,346 @@ function displayAttachedFiles() {
 }
 
 
-/* =========================================================
-   MODEL MENU
-========================================================= */
+/*
+   ATTACHMENTS
+*/
 
-function toggleModelMenu() {
+function setupAttachments() {
 
-    if (!modelMenu) {
-
-        return;
-
-    }
-
-
-    modelMenu.classList.toggle(
-        "show"
-    );
-
-}
-
-
-function closeModelMenu() {
-
-    if (!modelMenu) {
+    if (
+        !attachmentButton ||
+        !fileInput
+    ) {
 
         return;
 
     }
 
 
-    modelMenu.classList.remove(
-        "show"
+    attachmentButton.addEventListener(
+        "click",
+        function () {
+
+            if (
+                settingsFileAttachments &&
+                !settingsFileAttachments.checked
+            ) {
+
+                return;
+
+            }
+
+
+            fileInput.click();
+
+        }
+    );
+
+
+    fileInput.addEventListener(
+        "change",
+        function () {
+
+            attachedFiles =
+                Array.from(
+                    fileInput.files
+                );
+
+
+            displayAttachedFiles();
+
+        }
     );
 
 }
 
 
-function selectModel(model) {
+function displayAttachedFiles() {
 
-    currentModelName =
-        model;
+    if (!attachmentPreview) return;
 
 
-    localStorage.setItem(
-        "felixAIModel",
-        model
+    attachmentPreview.innerHTML = "";
+
+
+    attachedFiles.forEach(
+        function (file) {
+
+            const item =
+                document.createElement("div");
+
+
+            item.className =
+                "attachment-item";
+
+
+            item.textContent =
+                file.name;
+
+
+            attachmentPreview.appendChild(
+                item
+            );
+
+        }
     );
-
-
-    if (currentModel) {
-
-        currentModel.textContent =
-            model;
-
-    }
-
-
-    closeModelMenu();
 
 }
 
 
-/* =========================================================
-   SETTINGS
-========================================================= */
+/*
+   MODEL SELECTOR
+*/
 
-function openSettings() {
+function setupModelSelector() {
 
-    if (!settingsOverlay) {
+    if (
+        !modelSelectorButton ||
+        !modelDropdown
+    ) {
 
         return;
 
     }
 
 
-    settingsOverlay.classList.add(
-        "show"
+    modelSelectorButton.addEventListener(
+        "click",
+        function (event) {
+
+            event.stopPropagation();
+
+
+            const isOpen =
+                modelDropdown.classList.toggle(
+                    "show"
+                );
+
+
+            modelSelectorButton.setAttribute(
+                "aria-expanded",
+                String(isOpen)
+            );
+
+        }
+    );
+
+
+    const options =
+        modelDropdown.querySelectorAll(
+            ".model-option"
+        );
+
+
+    options.forEach(
+        function (option) {
+
+            option.addEventListener(
+                "click",
+                function () {
+
+                    currentModelName =
+                        option.dataset.model;
+
+
+                    const modelName =
+                        option.textContent.trim();
+
+
+                    if (selectedModel) {
+
+                        selectedModel.textContent =
+                            modelName;
+
+                    }
+
+
+                    if (settingsCurrentModel) {
+
+                        settingsCurrentModel.textContent =
+                            modelName;
+
+                    }
+
+
+                    options.forEach(
+                        function (item) {
+
+                            item.classList.remove(
+                                "active"
+                            );
+
+                        }
+                    );
+
+
+                    option.classList.add(
+                        "active"
+                    );
+
+
+                    modelDropdown.classList.remove(
+                        "show"
+                    );
+
+
+                    modelSelectorButton.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    document.addEventListener(
+        "click",
+        function () {
+
+            modelDropdown.classList.remove(
+                "show"
+            );
+
+
+            modelSelectorButton.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        }
     );
 
 }
 
 
-function closeSettings() {
+/*
+   SEARCH
+*/
 
-    if (!settingsOverlay) {
+function setupSearch() {
 
-        return;
-
-    }
+    if (!searchInput) return;
 
 
-    settingsOverlay.classList.remove(
-        "show"
+    searchInput.addEventListener(
+        "input",
+        function () {
+
+            const searchTerm =
+                searchInput.value
+                    .trim()
+                    .toLowerCase();
+
+
+            const items =
+                conversationList.querySelectorAll(
+                    ".conversation-item"
+                );
+
+
+            items.forEach(
+                function (item) {
+
+                    const title =
+                        item.textContent
+                            .toLowerCase();
+
+
+                    item.style.display =
+                        title.includes(
+                            searchTerm
+                        )
+                            ? "flex"
+                            : "none";
+
+                }
+            );
+
+        }
     );
 
 }
 
 
-/* =========================================================
+/*
    THEME
-========================================================= */
+*/
 
-function loadTheme() {
+function setupTheme() {
 
     const savedTheme =
         localStorage.getItem(
-            "felixAITheme"
+            "felixTheme"
         );
 
 
     if (
-        savedTheme ===
-        "dark"
+        savedTheme === "dark"
     ) {
 
         document.body.classList.add(
-            "dark-theme"
+            "dark"
         );
 
-    } else {
 
-        document.body.classList.remove(
-            "dark-theme"
+        if (settingsTheme) {
+
+            settingsTheme.checked =
+                true;
+
+        }
+
+    }
+
+
+    if (themeButton) {
+
+        themeButton.addEventListener(
+            "click",
+            toggleTheme
+        );
+
+    }
+
+
+    if (settingsTheme) {
+
+        settingsTheme.addEventListener(
+            "change",
+            function () {
+
+                if (
+                    settingsTheme.checked
+                ) {
+
+                    document.body.classList.add(
+                        "dark"
+                    );
+
+
+                    localStorage.setItem(
+                        "felixTheme",
+                        "dark"
+                    );
+
+                } else {
+
+                    document.body.classList.remove(
+                        "dark"
+                    );
+
+
+                    localStorage.setItem(
+                        "felixTheme",
+                        "light"
+                    );
+
+                }
+
+            }
         );
 
     }
@@ -1459,399 +3073,182 @@ function loadTheme() {
 function toggleTheme() {
 
     document.body.classList.toggle(
-        "dark-theme"
+        "dark"
     );
 
 
     const isDark =
         document.body.classList.contains(
-            "dark-theme"
+            "dark"
         );
 
 
     localStorage.setItem(
-        "felixAITheme",
+        "felixTheme",
         isDark
             ? "dark"
             : "light"
     );
 
-}
 
+    if (settingsTheme) {
 
-/* =========================================================
-   SETTINGS STORAGE
-========================================================= */
-
-function loadSettings() {
-
-    if (currentModel) {
-
-        currentModel.textContent =
-            currentModelName;
+        settingsTheme.checked =
+            isDark;
 
     }
 
 }
 
 
-/* =========================================================
-   CONVERSATIONS
-========================================================= */
+/*
+   SETTINGS
+*/
 
-async function loadConversations() {
+function setupSettings() {
 
-    try {
+    if (settingsButton) {
 
-        const response =
-            await fetch(
-                "/api/conversations"
-            );
+        settingsButton.addEventListener(
+            "click",
+            function () {
 
+                if (settingsOverlay) {
 
-        if (!response.ok) {
-
-            return;
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        conversations =
-            Array.isArray(data)
-                ? data
-                : data.conversations || [];
-
-
-        displayConversations(
-            conversations
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Could not load conversations:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   DISPLAY CONVERSATIONS
-========================================================= */
-
-function displayConversations(
-    conversationData
-) {
-
-    if (!conversationList) {
-
-        return;
-
-    }
-
-
-    conversationList.innerHTML = "";
-
-
-    conversationData.forEach(
-        function (conversation) {
-
-            const item =
-                document.createElement("div");
-
-
-            item.className =
-                "conversation-item";
-
-
-            item.dataset.id =
-                conversation.id;
-
-
-            const title =
-                conversation.title ||
-                "New conversation";
-
-
-            item.innerHTML = `
-                <span class="conversation-title">
-                    ${escapeHtml(title)}
-                </span>
-            `;
-
-
-            item.addEventListener(
-                "click",
-                function () {
-
-                    loadConversation(
-                        conversation.id
+                    settingsOverlay.classList.add(
+                        "show"
                     );
 
                 }
-            );
-
-
-            conversationList.appendChild(
-                item
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   LOAD SINGLE CONVERSATION
-========================================================= */
-
-async function loadConversation(id) {
-
-    try {
-
-        const response =
-            await fetch(
-                `/api/conversations/${id}`
-            );
-
-
-        if (!response.ok) {
-
-            return;
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        currentConversationId =
-            id;
-
-
-        currentConversation =
-            data.messages ||
-            data.conversation ||
-            [];
-
-
-        messagesContainer.innerHTML =
-            "";
-
-
-        if (
-            !currentConversation.length
-        ) {
-
-            if (welcomeScreen) {
-
-                welcomeScreen.style.display =
-                    "flex";
 
             }
+        );
 
-            return;
-
-        }
-
-
-        hideWelcomeScreen();
+    }
 
 
-        currentConversation.forEach(
-            function (message) {
+    if (settingsCloseButton) {
+
+        settingsCloseButton.addEventListener(
+            "click",
+            closeSettings
+        );
+
+    }
+
+
+    if (settingsDoneButton) {
+
+        settingsDoneButton.addEventListener(
+            "click",
+            closeSettings
+        );
+
+    }
+
+
+    if (settingsOverlay) {
+
+        settingsOverlay.addEventListener(
+            "click",
+            function (event) {
 
                 if (
-                    message.role ===
-                    "user"
+                    event.target ===
+                    settingsOverlay
                 ) {
 
-                    addUserMessage(
-                        message.content
-                    );
-
-                } else {
-
-                    addAssistantMessage(
-                        message.content
-                    );
+                    closeSettings();
 
                 }
 
             }
         );
 
+    }
 
-        if (window.innerWidth <= 768) {
+}
+
+
+function closeSettings() {
+
+    if (settingsOverlay) {
+
+        settingsOverlay.classList.remove(
+            "show"
+        );
+
+    }
+
+}
+
+
+/*
+   CLOSE MENUS WHEN CLICKING ELSEWHERE
+*/
+
+document.addEventListener(
+    "click",
+    function () {
+
+        closeAllConversationMenus();
+
+    }
+);
+
+
+/*
+   WINDOW RESIZE
+*/
+
+window.addEventListener(
+    "resize",
+    function () {
+
+        if (
+            window.innerWidth > 1023 &&
+            sidebarBackdrop
+        ) {
+
+            sidebarBackdrop.classList.remove(
+                "show"
+            );
+
+        }
+
+    }
+);
+
+
+/*
+   KEYBOARD
+*/
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (event.key === "Escape") {
+
+            if (
+                settingsOverlay &&
+                settingsOverlay.classList.contains(
+                    "show"
+                )
+            ) {
+
+                closeSettings();
+
+                return;
+
+            }
+
+
+            closeAllConversationMenus();
 
             closeSidebar();
 
         }
 
-
-    } catch (error) {
-
-        console.error(
-            "Could not load conversation:",
-            error
-        );
-
     }
-
-}
-
-
-/* =========================================================
-   SAVE CURRENT CONVERSATION
-========================================================= */
-
-async function saveCurrentConversation() {
-
-    if (
-        !currentConversation.length
-    ) {
-
-        return;
-
-    }
-
-
-    try {
-
-        const response =
-            await fetch(
-                "/api/conversations",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-
-                        id:
-                            currentConversationId,
-
-                        messages:
-                            currentConversation
-
-                    })
-
-                }
-            );
-
-
-        if (!response.ok) {
-
-            return;
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        if (data.id) {
-
-            currentConversationId =
-                data.id;
-
-        }
-
-
-        await loadConversations();
-
-
-    } catch (error) {
-
-        console.error(
-            "Could not save conversation:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   SEARCH CONVERSATIONS
-========================================================= */
-
-function filterConversations(
-    searchTerm
-) {
-
-    const term =
-        searchTerm
-            .trim()
-            .toLowerCase();
-
-
-    if (!term) {
-
-        displayConversations(
-            conversations
-        );
-
-        return;
-
-    }
-
-
-    const filtered =
-        conversations.filter(
-            function (conversation) {
-
-                const title =
-                    (
-                        conversation.title ||
-                        ""
-                    ).toLowerCase();
-
-
-                return title.includes(
-                    term
-                );
-
-            }
-        );
-
-
-    displayConversations(
-        filtered
-    );
-
-}
-
-
-/* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHtml(value) {
-
-    const div =
-        document.createElement("div");
-
-
-    div.textContent =
-        value;
-
-
-    return div.innerHTML;
-
-}
+);
