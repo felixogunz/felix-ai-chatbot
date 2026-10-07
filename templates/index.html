@@ -29,6 +29,7 @@
     <aside
         class="sidebar"
         id="sidebar"
+        aria-hidden="false"
     >
 
         <div class="sidebar-header">
@@ -49,6 +50,8 @@
                 class="icon-button"
                 id="closeSidebarButton"
                 aria-label="Close sidebar"
+                aria-controls="sidebar"
+                aria-expanded="true"
                 type="button"
             >
                 ×
@@ -78,6 +81,7 @@
                 type="text"
                 id="searchInput"
                 placeholder="Search conversations..."
+                aria-label="Search conversations"
             >
 
         </div>
@@ -118,6 +122,7 @@
     <div
         class="sidebar-backdrop"
         id="sidebarBackdrop"
+        aria-hidden="true"
     >
     </div>
 
@@ -132,14 +137,19 @@
 
             <div class="header-left">
 
+                <!-- HAMBURGER BUTTON -->
+
                 <button
                     class="icon-button mobile-menu-button"
                     id="openSidebarButton"
                     type="button"
                     aria-label="Open sidebar"
+                    aria-controls="sidebar"
+                    aria-expanded="false"
                 >
                     ☰
                 </button>
+
 
                 <button
                     class="header-title-button"
@@ -151,6 +161,8 @@
 
             </div>
 
+
+            <!-- MODEL SELECTOR -->
 
             <div class="model-selector">
 
@@ -180,7 +192,7 @@
 
                     <button
                         class="model-option active"
-                        data-model="gpt-5"
+                        data-model="Felix AI"
                         type="button"
                     >
 
@@ -197,7 +209,7 @@
 
                     <button
                         class="model-option"
-                        data-model="gpt-5"
+                        data-model="Fast"
                         type="button"
                     >
 
@@ -214,7 +226,7 @@
 
                     <button
                         class="model-option"
-                        data-model="gpt-5"
+                        data-model="Reasoning"
                         type="button"
                     >
 
@@ -242,6 +254,8 @@
             id="chatArea"
         >
 
+            <!-- WELCOME SCREEN -->
+
             <div
                 class="welcome-screen"
                 id="welcomeScreen"
@@ -259,6 +273,8 @@
                     Ask Felix AI anything.
                 </p>
 
+
+                <!-- SUGGESTIONS -->
 
                 <div class="suggestion-grid">
 
@@ -334,12 +350,16 @@
             </div>
 
 
+            <!-- MESSAGES -->
+
             <div
                 class="message-container"
                 id="messageContainer"
             >
             </div>
 
+
+            <!-- TYPING INDICATOR -->
 
             <div
                 class="typing-container"
@@ -349,7 +369,9 @@
                 <div class="typing-indicator">
 
                     <span></span>
+
                     <span></span>
+
                     <span></span>
 
                 </div>
@@ -363,9 +385,11 @@
         </section>
 
 
-        <!-- INPUT -->
+        <!-- INPUT AREA -->
 
         <section class="input-area">
+
+            <!-- ATTACHMENT PREVIEW -->
 
             <div
                 class="attachment-preview"
@@ -376,15 +400,20 @@
 
             <div class="input-wrapper">
 
+                <!-- ATTACHMENT BUTTON -->
+
                 <button
                     class="attachment-button"
                     id="attachmentButton"
                     title="Attach file"
+                    aria-label="Attach file"
                     type="button"
                 >
                     +
                 </button>
 
+
+                <!-- FILE INPUT -->
 
                 <input
                     type="file"
@@ -394,12 +423,17 @@
                 >
 
 
+                <!-- MESSAGE INPUT -->
+
                 <textarea
                     id="messageInput"
                     rows="1"
                     placeholder="Message Felix AI..."
+                    aria-label="Message Felix AI"
                 ></textarea>
 
+
+                <!-- STOP BUTTON -->
 
                 <button
                     class="stop-button"
@@ -411,10 +445,13 @@
                 </button>
 
 
+                <!-- SEND BUTTON -->
+
                 <button
                     class="send-button"
                     id="sendButton"
                     title="Send message"
+                    aria-label="Send message"
                     type="button"
                 >
                     ↑
@@ -422,6 +459,8 @@
 
             </div>
 
+
+            <!-- DISCLAIMER -->
 
             <div class="input-disclaimer">
 
@@ -437,6 +476,8 @@
         <div
             class="notification"
             id="notification"
+            role="status"
+            aria-live="polite"
         >
         </div>
 
@@ -445,7 +486,9 @@
 </div>
 
 
-<!-- SETTINGS -->
+<!-- ========================================================= -->
+<!-- SETTINGS OVERLAY -->
+<!-- ========================================================= -->
 
 <div
     class="settings-overlay"
@@ -459,6 +502,8 @@
         aria-modal="true"
         aria-labelledby="settingsTitle"
     >
+
+        <!-- SETTINGS HEADER -->
 
         <div class="settings-header">
 
@@ -478,7 +523,10 @@
         </div>
 
 
+        <!-- SETTINGS BODY -->
+
         <div class="settings-body">
+
 
             <!-- APPEARANCE -->
 
@@ -524,7 +572,7 @@
             </div>
 
 
-            <!-- CHAT -->
+            <!-- CHAT SETTINGS -->
 
             <div class="settings-section">
 
@@ -532,6 +580,8 @@
                     Chat
                 </div>
 
+
+                <!-- ENTER TO SEND -->
 
                 <div class="settings-row">
 
@@ -562,6 +612,8 @@
                 </div>
 
 
+                <!-- CONVERSATION HISTORY -->
+
                 <div class="settings-row">
 
                     <div class="settings-row-content">
@@ -590,6 +642,8 @@
 
                 </div>
 
+
+                <!-- FILE ATTACHMENTS -->
 
                 <div class="settings-row">
 
@@ -622,7 +676,7 @@
             </div>
 
 
-            <!-- MODEL -->
+            <!-- MODEL SETTINGS -->
 
             <div class="settings-section">
 
@@ -683,6 +737,8 @@
         </div>
 
 
+        <!-- SETTINGS FOOTER -->
+
         <div class="settings-footer">
 
             <button
@@ -700,13 +756,26 @@
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- ========================================================= -->
+<!-- JAVASCRIPT LIBRARIES -->
+<!-- ========================================================= -->
 
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
+></script>
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"
+></script>
+
+
+<!-- FELIX AI JAVASCRIPT -->
 
 <script
     src="{{ url_for('static', filename='app.js') }}"
 ></script>
+
 
 </body>
 

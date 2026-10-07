@@ -1563,8 +1563,138 @@ button {
     opacity: 0.85;
 }
 
+/* ============================================================
+   SIDEBAR RESPONSIVE SYSTEM
+   ============================================================ */
 
-/* MOBILE */
+/* ------------------------------------------------------------
+   DEFAULT SIDEBAR
+   ------------------------------------------------------------ */
+
+.sidebar {
+
+    width: 280px;
+
+    min-width: 280px;
+
+    flex-shrink: 0;
+
+    background: var(--sidebar);
+
+    border-right: 1px solid var(--border);
+
+    display: flex;
+
+    flex-direction: column;
+
+    padding: 14px;
+
+    z-index: 1500;
+
+    transition:
+        width 0.25s ease,
+        min-width 0.25s ease,
+        padding 0.25s ease,
+        border 0.25s ease,
+        transform 0.25s ease,
+        opacity 0.25s ease;
+}
+
+
+/* ------------------------------------------------------------
+   SIDEBAR OPEN
+   ------------------------------------------------------------ */
+
+.sidebar.open {
+
+    width: 280px;
+
+    min-width: 280px;
+
+    opacity: 1;
+
+    pointer-events: auto;
+
+}
+
+
+/* ------------------------------------------------------------
+   SIDEBAR CLOSED
+   ------------------------------------------------------------ */
+
+.sidebar.closed {
+
+    width: 0 !important;
+
+    min-width: 0 !important;
+
+    padding-left: 0 !important;
+
+    padding-right: 0 !important;
+
+    border-right: none !important;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    overflow: hidden;
+
+}
+
+
+/* ------------------------------------------------------------
+   HAMBURGER
+   ------------------------------------------------------------ */
+
+#openSidebarButton {
+
+    display: none;
+
+}
+
+
+/*
+ * The hamburger appears whenever the
+ * sidebar has been closed.
+ */
+
+body.sidebar-closed #openSidebarButton {
+
+    display: flex;
+
+}
+
+
+/* ------------------------------------------------------------
+   BACKDROP
+   ------------------------------------------------------------ */
+
+.sidebar-backdrop {
+
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    z-index: 1400;
+
+}
+
+
+.sidebar-backdrop.show {
+
+    display: block;
+
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
 
 @media (max-width: 768px) {
 
@@ -1572,42 +1702,136 @@ button {
 
         position: fixed;
 
-        left: -290px;
-
         top: 0;
+
+        left: 0;
 
         bottom: 0;
 
+        width: 280px;
+
+        min-width: 280px;
+
+        height: 100vh;
+
         z-index: 1500;
 
-        transition: left 0.2s;
+        padding: 14px;
+
+        transform: translateX(0);
+
+        opacity: 1;
+
+        overflow: hidden;
 
         box-shadow:
             5px 0 25px rgba(0, 0, 0, 0.12);
+
     }
 
+
+    /*
+     * OPEN MOBILE SIDEBAR
+     */
 
     .sidebar.open {
 
-        left: 0;
+        transform: translateX(0);
+
+        width: 280px;
+
+        min-width: 280px;
+
+        padding: 14px;
+
+        opacity: 1;
+
+        pointer-events: auto;
+
     }
 
 
-    .mobile-menu-button {
+    /*
+     * CLOSED MOBILE SIDEBAR
+     */
+
+    .sidebar.closed {
+
+        width: 280px !important;
+
+        min-width: 280px !important;
+
+        padding: 14px !important;
+
+        border-right: 1px solid var(--border) !important;
+
+        transform: translateX(-100%);
+
+        opacity: 0;
+
+        pointer-events: none;
+
+    }
+
+
+    /*
+     * Hamburger is available on mobile.
+     */
+
+    #openSidebarButton {
 
         display: flex;
+
+        width: 36px;
+
+        height: 36px;
+
+        flex-shrink: 0;
+
+    }
+
+
+    /*
+     * Prevent background scrolling while
+     * the mobile sidebar is open.
+     */
+
+    body.sidebar-open {
+
+        overflow: hidden;
+
+    }
+
+
+    /*
+     * Backdrop only appears when opened.
+     */
+
+    .sidebar-backdrop {
+
+        display: none;
+
+    }
+
+
+    .sidebar-backdrop.show {
+
+        display: block;
+
     }
 
 
     .suggestion-grid {
 
         grid-template-columns: 1fr;
+
     }
 
 
     .welcome-screen h1 {
 
         font-size: 23px;
+
     }
 
 
@@ -1616,6 +1840,7 @@ button {
         padding-left: 12px;
 
         padding-right: 12px;
+
     }
 
 
@@ -1624,12 +1849,14 @@ button {
         padding-left: 10px;
 
         padding-right: 10px;
+
     }
 
 
     .message.user .message-content {
 
         max-width: 85%;
+
     }
 
 
@@ -1638,6 +1865,7 @@ button {
         align-items: flex-end;
 
         padding: 0;
+
     }
 
 
@@ -1652,34 +1880,143 @@ button {
             16px
             0
             0;
+
     }
 
 }
 
 
+/* ============================================================
+   DESKTOP
+   ============================================================ */
+
+@media (min-width: 769px) {
+
+    .sidebar {
+
+        position: relative;
+
+        left: auto;
+
+        transform: translateX(0);
+
+        width: 280px;
+
+        min-width: 280px;
+
+        opacity: 1;
+
+        pointer-events: auto;
+
+    }
+
+
+    /*
+     * Closed desktop sidebar.
+     */
+
+    .sidebar.closed {
+
+        width: 0 !important;
+
+        min-width: 0 !important;
+
+        padding-left: 0 !important;
+
+        padding-right: 0 !important;
+
+        border-right: none !important;
+
+        transform: translateX(-100%);
+
+        opacity: 0;
+
+        pointer-events: none;
+
+    }
+
+
+    /*
+     * No backdrop on desktop.
+     */
+
+    .sidebar-backdrop {
+
+        display: none !important;
+
+    }
+
+
+    /*
+     * Hamburger appears when the desktop
+     * sidebar has been closed.
+     */
+
+    body.sidebar-closed #openSidebarButton {
+
+        display: flex;
+
+    }
+
+}
+
+
+/* ============================================================
+   SMALL SCREENS
+   ============================================================ */
+
 @media (max-width: 500px) {
+
+    .sidebar {
+
+        width: 280px;
+
+        min-width: 280px;
+
+    }
+
+
+    .sidebar.closed {
+
+        width: 280px !important;
+
+        min-width: 280px !important;
+
+    }
+
 
     .model-selector-button {
 
         border: none;
+
     }
 
 
     .model-selector-button .dropdown-arrow {
 
         padding-right: 0;
+
     }
 
 
     .header {
 
         padding: 0 10px;
+
+    }
+
+
+    .header-left {
+
+        gap: 4px;
+
     }
 
 
     .message {
 
         gap: 8px;
+
     }
 
 
@@ -1690,6 +2027,7 @@ button {
         height: 26px;
 
         min-width: 26px;
+
     }
 
 
@@ -1698,6 +2036,7 @@ button {
         padding-left: 16px;
 
         padding-right: 16px;
+
     }
 
 
@@ -1706,6 +2045,7 @@ button {
         padding-left: 16px;
 
         padding-right: 16px;
+
     }
 
 
@@ -1714,12 +2054,25 @@ button {
         padding-left: 16px;
 
         padding-right: 16px;
+
     }
 
 
     .settings-row {
 
         gap: 12px;
+
+    }
+
+
+    #openSidebarButton {
+
+        width: 38px;
+
+        height: 38px;
+
+        flex-shrink: 0;
+
     }
 
 }
