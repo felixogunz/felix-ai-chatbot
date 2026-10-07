@@ -6,9 +6,9 @@ from pathlib import Path
 from werkzeug.utils import secure_filename
 
 
-# ============================================================
+
 # CONVERSATION TITLE
-# ============================================================
+
 
 def generate_title(message):
     """
@@ -31,9 +31,9 @@ def generate_title(message):
     return message[:50].rstrip() + "..."
 
 
-# ============================================================
+
 # SAFE FILE NAME
-# ============================================================
+
 
 def get_safe_filename(filename):
     """
@@ -57,9 +57,9 @@ def get_safe_filename(filename):
     return filename
 
 
-# ============================================================
+
 # UNIQUE FILE NAME
-# ============================================================
+
 
 def get_unique_filename(filename):
     """
@@ -84,9 +84,9 @@ def get_unique_filename(filename):
     )
 
 
-# ============================================================
+
 # FILE EXTENSION
-# ============================================================
+
 
 def get_file_extension(filename):
     """
@@ -101,9 +101,9 @@ def get_file_extension(filename):
     ).suffix.lower()
 
 
-# ============================================================
+
 # ALLOWED FILE
-# ============================================================
+
 
 def allowed_file(
     filename,
@@ -132,9 +132,9 @@ def allowed_file(
     return extension in allowed_extensions
 
 
-# ============================================================
+
 # FILE TYPE
-# ============================================================
+
 
 def get_file_type(filename):
     """
@@ -166,9 +166,9 @@ def get_file_type(filename):
     )
 
 
-# ============================================================
+
 # FILE SIZE
-# ============================================================
+
 
 def format_file_size(size):
     """
@@ -208,9 +208,9 @@ def format_file_size(size):
     )
 
 
-# ============================================================
+
 # CLEAN TEXT
-# ============================================================
+
 
 def clean_text(text):
     """
@@ -234,9 +234,9 @@ def clean_text(text):
     return "\n".join(lines)
 
 
-# ============================================================
+
 # TRUNCATE TEXT
-# ============================================================
+
 
 def truncate_text(
     text,
@@ -260,9 +260,9 @@ def truncate_text(
     )
 
 
-# ============================================================
+
 # EXTRACT PDF TEXT
-# ============================================================
+
 
 def extract_pdf_text(file_path):
     """
@@ -326,9 +326,9 @@ def extract_pdf_text(file_path):
         )
 
 
-# ============================================================
+
 # EXTRACT DOCX TEXT
-# ============================================================
+
 
 def extract_docx_text(file_path):
     """
@@ -357,9 +357,9 @@ def extract_docx_text(file_path):
 
         paragraphs = []
 
-        # ----------------------------------------------------
+        
         # NORMAL PARAGRAPHS
-        # ----------------------------------------------------
+        
 
         for paragraph in document.paragraphs:
 
@@ -371,9 +371,9 @@ def extract_docx_text(file_path):
                     text
                 )
 
-        # ----------------------------------------------------
+        
         # TABLES
-        # ----------------------------------------------------
+        
 
         for table in document.tables:
 
@@ -414,9 +414,9 @@ def extract_docx_text(file_path):
         )
 
 
-# ============================================================
+
 # EXTRACT TEXT FROM FILE
-# ============================================================
+
 
 def extract_text_from_file(file_path):
     """
@@ -447,9 +447,9 @@ def extract_text_from_file(file_path):
 
     extension = file_path.suffix.lower()
 
-    # --------------------------------------------------------
+    
     # TXT
-    # --------------------------------------------------------
+    
 
     if extension == ".txt":
 
@@ -472,9 +472,9 @@ def extract_text_from_file(file_path):
                 f"Unable to read text file: {error}"
             )
 
-    # --------------------------------------------------------
+    
     # PDF
-    # --------------------------------------------------------
+    
 
     if extension == ".pdf":
 
@@ -482,9 +482,9 @@ def extract_text_from_file(file_path):
             file_path
         )
 
-    # --------------------------------------------------------
+    
     # DOCX
-    # --------------------------------------------------------
+    
 
     if extension == ".docx":
 
@@ -492,18 +492,17 @@ def extract_text_from_file(file_path):
             file_path
         )
 
-    # --------------------------------------------------------
+    
     # UNSUPPORTED FILE
-    # --------------------------------------------------------
+    
 
     raise ValueError(
         f"Unsupported file type: {extension}"
     )
 
 
-# ============================================================
+
 # ENSURE DIRECTORY
-# ============================================================
 
 def ensure_directory(directory):
     """
@@ -528,9 +527,9 @@ def ensure_directory(directory):
         return False
 
 
-# ============================================================
+
 # SAFE PATH
-# ============================================================
+
 
 def get_safe_path(
     directory,
@@ -573,9 +572,9 @@ def get_safe_path(
     return file_path
 
 
-# ============================================================
+
 # FILE EXISTS
-# ============================================================
+
 
 def file_exists(file_path):
     """
@@ -591,9 +590,9 @@ def file_exists(file_path):
     ).is_file()
 
 
-# ============================================================
+
 # READ TEXT FILE
-# ============================================================
+
 
 def read_text_file(file_path):
     """
@@ -616,9 +615,9 @@ def read_text_file(file_path):
         return ""
 
 
-# ============================================================
+
 # FILE INFORMATION
-# ============================================================
+
 
 def get_file_info(file_path):
     """
